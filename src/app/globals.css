@@ -1,0 +1,223 @@
+@import "tailwindcss";
+
+/* ============================================================
+   READ-OUT — design tokens
+   A precision-instrument panel: anodised olive housing, machined
+   type, one hot amber signal. Surface is tinted because the
+   surface IS the housing; the mood is environmental, not "warm".
+   Contrast verified: ink 17.0:1 · muted 7.7:1 · dim 5.4:1
+   · primary 9.9:1 · signal 8.5:1 (all against --bg)
+   ============================================================ */
+@theme {
+  --color-bg: oklch(0.17 0.018 122);
+  --color-surface: oklch(0.225 0.022 122);
+  --color-surface-2: oklch(0.275 0.024 122);
+  --color-line: oklch(0.34 0.02 122);
+  --color-line-soft: oklch(0.28 0.02 122);
+  --color-ink: oklch(0.96 0.008 110);
+  --color-muted: oklch(0.72 0.018 112);
+  --color-dim: oklch(0.625 0.018 112);
+  --color-primary: oklch(0.78 0.15 124);
+  --color-signal: oklch(0.76 0.165 62);
+
+  --font-display: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-martian), "Martian Mono", ui-monospace, monospace;
+
+  /* exponential ease-out only — no bounce, no elastic */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --z-base: 1;
+  --z-sticky: 20;
+  --z-nav: 30;
+  --z-cursor: 60;
+  --z-boot: 80;
+}
+
+/* semantic z-scale, referenced by name in components */
+:root {
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-nav: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-cursor: 60;
+  --z-boot: 80;
+}
+
+* {
+  border-color: var(--color-line-soft);
+}
+
+html {
+  background: var(--color-bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-signal);
+  color: var(--color-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---------- type primitives ---------- */
+.u-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-stretch: 125%;
+  letter-spacing: -0.03em; /* floor is -0.04em */
+  line-height: 0.9;
+  text-wrap: balance;
+}
+
+.u-mono {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the one deliberate label system: an engraved panel tag, always
+   paired with a tick rule. Not an eyebrow above every heading. */
+.u-engrave {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+  font-weight: 500;
+}
+
+.u-prose {
+  max-width: 68ch;
+  text-wrap: pretty;
+  line-height: 1.6;
+}
+
+/* ---------- panel materials ---------- */
+.u-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line-soft);
+}
+
+/* machined chamfer: a 1px inner highlight, the way anodised
+   aluminium catches light on a milled edge */
+.u-chamfer {
+  box-shadow: inset 0 1px 0 0 color-mix(in oklch, var(--color-ink) 8%, transparent);
+}
+
+.u-grain {
+  position: relative;
+}
+.u-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* hairline measurement rule with an end tick, like a datasheet */
+.u-rule {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-line) 0%,
+    var(--color-line) 70%,
+    transparent 100%
+  );
+}
+
+/* ---------- LED ---------- */
+.u-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-signal);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-signal) 18%, transparent),
+    0 0 12px 0 color-mix(in oklch, var(--color-signal) 60%, transparent);
+}
+
+@keyframes led-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.u-led-live {
+  animation: led-pulse 2.4s var(--ease-out-quart) infinite;
+}
+
+@keyframes marquee-track {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* ---------- scrollbar ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-2);
+  border: 2px solid var(--color-bg);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-line); }
+
+/* ---------- custom cursor: only where a real pointer exists ---------- */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+}
+
+/* ---------- reduced motion: every animation gets an alternative ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .u-led-live { animation: none; }
+  html.has-cursor,
+  html.has-cursor * { cursor: auto !important; }
+}
+
+/* a packet travelling an edge of the architecture diagram. Paths carry
+   pathLength="1", so this one keyframe is correct for every edge length. */
+@keyframes flow-pulse {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* repeat visitors and reduced-motion users never see the boot panel */
+html.boot-done #boot { display: none; }
+
+/* safety net: if scripts never run, nothing stays hidden waiting for them */
+@media (scripting: none) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  #boot { display: none !important; }
+}
