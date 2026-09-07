@@ -1,5 +1,7 @@
 import { profile } from "@/content/site";
 import Reveal from "./Reveal";
+import SplitText from "./SplitText";
+import EmailLink from "./EmailLink";
 
 export default function Contact() {
   const year = new Date().getFullYear();
@@ -19,30 +21,14 @@ export default function Contact() {
           </div>
         </Reveal>
 
-        <Reveal delay={0.05}>
-          <h2 className="u-display text-ink mt-8 text-[clamp(2.25rem,8vw,6rem)]">
-            Let&rsquo;s build
-            <br />
-            something that lasts.
-          </h2>
-        </Reveal>
+        <h2 className="u-display text-ink mt-8 text-[clamp(2.25rem,8vw,6rem)]">
+          <SplitText text="Let’s build" stagger={0.07} />
+          <br />
+          <SplitText text="something that lasts." delay={0.12} stagger={0.07} />
+        </h2>
 
         <Reveal delay={0.1}>
-          <a
-            href={`mailto:${profile.email}`}
-            data-cursor="Write to me"
-            className="group text-signal mt-10 inline-flex flex-wrap items-center gap-3 text-[clamp(1.1rem,3.4vw,2rem)] break-all"
-          >
-            <span className="decoration-signal/40 underline-offset-8 group-hover:underline">
-              {profile.email}
-            </span>
-            <span
-              className="transition-transform duration-300 group-hover:translate-x-1"
-              aria-hidden
-            >
-              →
-            </span>
-          </a>
+          <EmailLink />
         </Reveal>
 
         <div className="border-line-soft mt-20 grid gap-8 border-t pt-8 sm:grid-cols-3">

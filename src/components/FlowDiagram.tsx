@@ -104,28 +104,33 @@ export default function FlowDiagram({
                 strokeWidth={1}
                 strokeDasharray={edge.dashed ? "4 4" : undefined}
                 markerEnd="url(#flow-arrow)"
-                initial={reduced ? false : { pathLength: 0, opacity: 0 }}
+                initial={{ pathLength: 0, opacity: 0 }}
                 whileInView={{ pathLength: 1, opacity: 1 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.8, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                // only the timing varies for reduced motion; branching the
+                // markup itself would be a hydration mismatch
+                transition={{
+                  duration: reduced ? 0 : 0.8,
+                  delay: reduced ? 0 : index * 0.07,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
               />
 
-              {/* the packet: only for motion-tolerant viewers */}
-              {!reduced && (
-                <path
-                  d={d}
-                  fill="none"
-                  stroke="var(--color-signal)"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  pathLength={1}
-                  strokeDasharray="0.045 0.955"
-                  style={{
-                    animation: `flow-pulse 3.4s linear infinite`,
-                    animationDelay: `${index * 0.42}s`,
-                  }}
-                />
-              )}
+              {/* the packet — always rendered, hidden in CSS for reduced motion */}
+              <path
+                data-pulse
+                d={d}
+                fill="none"
+                stroke="var(--color-signal)"
+                strokeWidth={2}
+                strokeLinecap="round"
+                pathLength={1}
+                strokeDasharray="0.045 0.955"
+                style={{
+                  animation: `flow-pulse 3.4s linear infinite`,
+                  animationDelay: `${index * 0.42}s`,
+                }}
+              />
 
               {edge.label && (
                 <text
@@ -147,10 +152,14 @@ export default function FlowDiagram({
         {nodes.map((node, index) => (
           <motion.g
             key={node.id}
-            initial={reduced ? false : { opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: 0.1 + index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+            transition={{
+              duration: reduced ? 0 : 0.5,
+              delay: reduced ? 0 : 0.1 + index * 0.05,
+              ease: [0.16, 1, 0.3, 1],
+            }}
           >
             <rect
               x={x(node.col)}

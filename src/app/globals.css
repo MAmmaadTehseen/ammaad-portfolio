@@ -200,6 +200,22 @@ body {
   .u-led-live { animation: none; }
   html.has-cursor,
   html.has-cursor * { cursor: auto !important; }
+
+  /* JS-driven motion writes inline transforms, which CSS animation rules above
+     cannot reach. Components render one element tree for everyone (branching on
+     useReducedMotion would be a hydration mismatch), so the motion is pinned
+     here instead. !important beats the inline style. */
+  [data-reveal],
+  [data-motion],
+  [data-split] span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  /* travelling packets on the architecture diagrams are pure motion — there is
+     no static version worth showing, so they are simply absent */
+  [data-pulse] { display: none !important; }
 }
 
 /* a packet travelling an edge of the architecture diagram. Paths carry

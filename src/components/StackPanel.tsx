@@ -1,5 +1,6 @@
 import { stackGroups } from "@/content/site";
 import Reveal from "./Reveal";
+import SplitText from "./SplitText";
 
 /**
  * Grouped by how often the tool is actually in hand, not by a made-up
@@ -9,7 +10,9 @@ export default function StackPanel() {
   return (
     <section id="stack" className="mx-auto max-w-[1400px] scroll-mt-24 px-5 py-24 sm:px-8 sm:py-32">
       <div className="border-line-soft mb-12 flex flex-wrap items-end justify-between gap-6 border-b pb-6">
-        <h2 className="u-display text-ink text-[clamp(2.25rem,6vw,4.5rem)]">Stack</h2>
+        <h2 className="u-display text-ink text-[clamp(2.25rem,6vw,4.5rem)]">
+          <SplitText text="Stack" />
+        </h2>
         <p className="u-mono text-dim max-w-xs text-[11px] leading-relaxed">
           Grouped by how often it is in my hands — not by a number I made up.
         </p>

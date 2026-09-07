@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 
 type Props = {
@@ -13,18 +13,15 @@ type Props = {
 };
 
 /**
- * A single entrance, used sparingly. Reduced-motion users get the content
- * with no transform at all, and a `scripting: none` rule in globals.css keeps
- * the page readable if JS never arrives.
+ * A single entrance, used sparingly.
+ *
+ * Reduced motion is handled by a `[data-reveal]` rule in globals.css rather
+ * than by branching here — swapping the element type on useReducedMotion()
+ * renders a different tree on the server than on the client and trips a
+ * hydration mismatch. The same rule covers the no-JS case.
  */
 export default function Reveal({ children, delay = 0, y = 22, className, as = "div" }: Props) {
-  const reduced = useReducedMotion();
   const Tag = motion[as];
-
-  if (reduced) {
-    const Plain = as;
-    return <Plain className={className}>{children}</Plain>;
-  }
 
   return (
     <Tag

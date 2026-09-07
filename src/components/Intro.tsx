@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { CHANNELS, bio } from "@/content/site";
 import { useChannel } from "@/lib/channel";
 import ChannelSwitch from "./ChannelSwitch";
@@ -9,7 +9,6 @@ import Reveal from "./Reveal";
 
 export default function Intro() {
   const { channel } = useChannel();
-  const reduced = useReducedMotion();
   const current = bio[channel];
   const hint = CHANNELS.find((option) => option.id === channel)?.hint;
 
@@ -36,9 +35,10 @@ export default function Intro() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={channel}
-              initial={reduced ? false : { opacity: 0, y: 16 }}
+              data-motion
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
             >
               <h2 className="u-display text-ink text-[clamp(1.9rem,5.2vw,4rem)]">

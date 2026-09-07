@@ -30,8 +30,9 @@ export default function Hero() {
       className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden pt-24 pb-8"
     >
       <motion.div
+        data-motion
         className="pointer-events-none absolute inset-0"
-        style={reduced ? undefined : { y: traceY, opacity: fade }}
+        style={{ y: traceY, opacity: fade }}
       >
         <SignalCanvas className="h-full w-full" />
       </motion.div>
@@ -55,14 +56,16 @@ export default function Hero() {
       />
 
       <motion.div
+        data-motion
         className="relative mx-auto w-full max-w-[1400px] px-5 sm:px-8"
-        style={reduced ? undefined : { y: typeY }}
+        style={{ y: typeY }}
       >
         <div className="mb-8 flex items-end justify-between gap-6 sm:mb-12">
           <div className="max-w-md">
             <motion.p
+              data-motion
               className="text-muted text-balance"
-              initial={reduced ? false : { opacity: 0, y: 14 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={animate ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.7, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
             >
@@ -72,8 +75,9 @@ export default function Hero() {
           </div>
 
           <motion.div
+            data-motion
             className="hidden shrink-0 text-right md:block"
-            initial={reduced ? false : { opacity: 0 }}
+            initial={{ opacity: 0 }}
             animate={animate ? { opacity: 1 } : undefined}
             transition={{ duration: 0.7, delay: 0.7 }}
           >
@@ -95,8 +99,9 @@ export default function Hero() {
           {letters.map((letter, index) => (
             <span key={`${letter}-${index}`} className="overflow-hidden pb-[0.06em]" aria-hidden>
               <motion.span
+                data-motion
                 className="block"
-                initial={reduced ? false : { y: "108%" }}
+                initial={{ y: "108%" }}
                 animate={animate ? { y: "0%" } : undefined}
                 transition={{
                   duration: 0.95,
@@ -111,8 +116,9 @@ export default function Hero() {
         </h1>
 
         <motion.div
+          data-motion
           className="border-line-soft mt-8 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t pt-4"
-          initial={reduced ? false : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           animate={animate ? { opacity: 1 } : undefined}
           transition={{ duration: 0.8, delay: 0.9 }}
         >
