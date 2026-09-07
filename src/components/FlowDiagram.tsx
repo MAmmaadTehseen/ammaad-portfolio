@@ -29,24 +29,30 @@ const KIND_STROKE: Record<FlowNode["kind"], string> = {
   worker: "color-mix(in oklch, var(--color-signal) 55%, transparent)",
 };
 
-function edgePath(from: FlowNode, to: FlowNode) {
+/**
+ * Geometry for one edge. Parallel edges between the same two columns would
+ * otherwise share a corridor and stack their labels on top of each other, so
+ * each edge takes its vertical run at a slightly different fraction of the gap.
+ */
+function geometry(from: FlowNode, to: FlowNode, index: number) {
   const forward = to.col >= from.col;
   const sx = forward ? x(from.col) + NODE_W : x(from.col);
   const tx = forward ? x(to.col) : x(to.col) + NODE_W;
   const sy = y(from.row) + NODE_H / 2;
   const ty = y(to.row) + NODE_H / 2;
+  const sameRow = from.row === to.row;
 
-  if (from.row === to.row) return `M ${sx} ${sy} H ${tx}`;
-  const midX = sx + (tx - sx) / 2;
-  return `M ${sx} ${sy} H ${midX} V ${ty} H ${tx}`;
-}
+  const frac = 0.4 + (index % 3) * 0.1;
+  const midX = sx + (tx - sx) * frac;
 
-function labelPoint(from: FlowNode, to: FlowNode) {
-  const forward = to.col >= from.col;
-  const sx = forward ? x(from.col) + NODE_W : x(from.col);
-  const tx = forward ? x(to.col) : x(to.col) + NODE_W;
-  const sy = y(from.row) + NODE_H / 2;
-  return { cx: sx + (tx - sx) / 2, cy: from.row === to.row ? sy - 9 : sy - 9 };
+  return {
+    d: sameRow ? `M ${sx} ${sy} H ${tx}` : `M ${sx} ${sy} H ${midX} V ${ty} H ${tx}`,
+    // same-row labels sit above the line; elbow labels sit beside the vertical
+    // run, which is unique to that edge
+    label: sameRow
+      ? { lx: sx + (tx - sx) / 2, ly: sy - 9, anchor: "middle" as const }
+      : { lx: midX + 7, ly: (sy + ty) / 2 + 3, anchor: "start" as const },
+  };
 }
 
 export default function FlowDiagram({
@@ -87,8 +93,7 @@ export default function FlowDiagram({
           const from = byId.get(edge.from);
           const to = byId.get(edge.to);
           if (!from || !to) return null;
-          const d = edgePath(from, to);
-          const point = labelPoint(from, to);
+          const { d, label } = geometry(from, to, index);
 
           return (
             <g key={`${edge.from}-${edge.to}`}>
@@ -124,9 +129,9 @@ export default function FlowDiagram({
 
               {edge.label && (
                 <text
-                  x={point.cx}
-                  y={point.cy}
-                  textAnchor="middle"
+                  x={label.lx}
+                  y={label.ly}
+                  textAnchor={label.anchor}
                   className="u-mono"
                   fontSize="10"
                   letterSpacing="0.08em"
