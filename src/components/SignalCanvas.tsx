@@ -14,8 +14,8 @@ import { useEffect, useRef } from "react";
  * 1. The backing store renders at a fraction of CSS pixels. Every feature here
  *    is a soft glow, so there is nothing for the extra resolution to resolve;
  *    it is pure fill-rate. This is the single biggest saving.
- * 2. Three fBm octaves rather than five. The traces are wide and slow, so the
- *    top two octaves were riding below the visible amplitude.
+ * 2. Four fBm octaves rather than five. The fifth rode below the amplitude
+ *    these traces actually show.
  * 3. The loop stops when the hero leaves the viewport and when the tab is
  *    hidden. Time accumulates only while running, so resuming continues the
  *    animation instead of jumping.
@@ -44,12 +44,12 @@ float noise(vec2 p) {
              mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
 }
 
-// three octaves: the fourth and fifth sat below the amplitude these traces
-// actually show, so they cost fill rate and rendered nothing
+// four octaves: five was past the amplitude these traces show, three read as
+// too smooth once the field was upscaled
 float fbm(vec2 p) {
   float v = 0.0;
   float a = 0.5;
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 4; i++) {
     v += a * noise(p);
     p *= 2.02;
     a *= 0.5;
@@ -63,8 +63,21 @@ void main() {
 
   vec3 col = vec3(0.0);
 
+  vec3 olive = vec3(0.38, 0.52, 0.20);
+  vec3 amber = vec3(0.98, 0.58, 0.14);
+
   // the pointer, in the same space as p
   vec2 mp = (u_mouse - 0.5 * u_res) / u_res.y;
+
+  // ---- antigravity: space itself bulges away from the pointer ----
+  // Everything downstream is sampled in the warped space, so the traces, the
+  // packets riding them and the grain all bend around the cursor as one field
+  // rather than as separate effects layered on top of each other.
+  vec2 toM = p - mp;
+  float md = length(toM);
+  float bulge = u_influence * 0.085 * exp(-md * md * 5.5);
+  p += (toM / (md + 0.0001)) * bulge;
+
   float mdist = length(p - mp);
 
   for (int i = 0; i < 7; i++) {
@@ -82,8 +95,8 @@ void main() {
     float dx = p.x - mp.x;
     float reach = exp(-dx * dx * 9.0);
     float lift = y - mp.y;
-    float dir = lift / (abs(lift) + 0.045);
-    float bend = dir * reach * 0.085 * u_influence * exp(-abs(lift) * 2.4);
+    float dir = lift / (abs(lift) + 0.075);
+    float bend = dir * reach * 0.075 * u_influence * exp(-abs(lift) * 2.2);
     y += bend;
 
     float d = abs(p.y - y);
@@ -95,11 +108,24 @@ void main() {
     // the trace runs hot where it is being pushed
     energy = clamp(energy + reach * u_influence * exp(-abs(lift) * 3.0) * 0.55, 0.0, 1.0);
 
-    vec3 olive = vec3(0.38, 0.52, 0.20);
-    vec3 amber = vec3(0.98, 0.58, 0.14);
     vec3 tint = mix(olive, amber, energy * 0.8);
-
     col += (core * 0.55 + glow) * tint * (0.5 + 0.5 * energy);
+
+    // Packets riding the trace — the same motif as the architecture diagrams,
+    // at the scale of the whole panel. They cost nothing extra: the trace's y
+    // at this pixel's x is already solved above, so a packet is one distance
+    // test rather than another noise evaluation.
+    for (int j = 0; j < 2; j++) {
+      float phase = fract(u_time * (0.055 + fi * 0.009) + float(j) * 0.5 + fi * 0.23);
+      float px = mix(-1.10, 1.10, phase);
+      float dxp = p.x - px;
+      float dyp = p.y - y;
+      // squashed vertically so a packet reads as travelling along the line
+      float dp2 = dxp * dxp + dyp * dyp * 6.0;
+      // fades in and out at the ends instead of popping at the edge
+      float ends = smoothstep(0.0, 0.12, phase) * (1.0 - smoothstep(0.88, 1.0, phase));
+      col += amber * exp(-dp2 * 6000.0) * 1.35 * ends;
+    }
   }
 
   // a soft bloom around the cursor, so the field acknowledges it even between
@@ -124,7 +150,7 @@ void main() {
 
 /** Fraction of a CSS pixel actually rendered. Everything on screen is a soft
  *  glow, so this is invisible and roughly quadratic in cost. */
-const RES_SCALE = 0.6;
+const RES_SCALE = 0.7;
 const MAX_DPR = 1.25;
 
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
@@ -153,7 +179,9 @@ export default function SignalCanvas({ className }: { className?: string }) {
       depth: false,
       stencil: false,
       powerPreference: "low-power",
-      desynchronized: true,
+      // deliberately NOT desynchronized: it buys nothing for an ambient
+      // background and can leave the canvas blank on some real GPUs while
+      // rendering fine under software rasterisation
     } as WebGLContextAttributes);
     if (!gl) return; // no WebGL: the section simply reads as a plain panel
 
@@ -215,6 +243,15 @@ export default function SignalCanvas({ className }: { className?: string }) {
       const delta = last ? Math.min(now - last, 64) : 16;
       last = now;
       if (!reduced.matches) elapsed += delta / 1000;
+
+      // No pointer on this device (touch, or nobody has moved yet): drift a
+      // soft attractor so the field still breathes instead of sitting flat.
+      if (!pointer.seen && !reduced.matches) {
+        const drift = elapsed * 0.16;
+        pointer.tx = canvas.width * (0.5 + 0.3 * Math.sin(drift));
+        pointer.ty = canvas.height * (0.62 + 0.16 * Math.sin(drift * 1.37));
+        pointer.target = 0.55;
+      }
 
       // frame-rate independent easing, so the feel is the same at 30 and 144Hz
       const ease = 1 - Math.pow(0.0015, delta / 1000);
