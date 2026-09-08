@@ -73,7 +73,11 @@ Exponential ease-out only — `cubic-bezier(0.16, 1, 0.3, 1)`. No bounce, no ela
    session, gated pre-paint by an inline script.
 2. **Hero** — per-letter mask reveal, staggered 60ms, held until boot clears.
 3. **Signal trace** — WebGL fBm field, seven stacked traces with an amber energy
-   term. DPR capped at 1.5; stops when the tab is hidden.
+   term. The traces are repelled by the pointer and run hot where they bend, so
+   the hero is something you can push around rather than something you watch.
+   Renders at 0.6x CSS pixels (every feature is a soft glow, so there is nothing
+   for the resolution to resolve), three fBm octaves, and the loop stops
+   entirely when the hero leaves the viewport or the tab is hidden.
 4. **Cursor** — a crosshair reticle that rotates 45° and expands over targets, with
    a readout label from `data-cursor`.
 5. **Scroll** — Lenis wheel smoothing; the nav hairline is a signal level.

@@ -30,6 +30,8 @@ const FRAG = `
 precision mediump float;
 uniform vec2 u_res;
 uniform float u_time;
+uniform vec2 u_mouse;      // framebuffer pixels
+uniform float u_influence; // 0 when the pointer is away, 1 when it is over
 
 float hash(float n) { return fract(sin(n) * 43758.5453123); }
 
@@ -61,6 +63,10 @@ void main() {
 
   vec3 col = vec3(0.0);
 
+  // the pointer, in the same space as p
+  vec2 mp = (u_mouse - 0.5 * u_res) / u_res.y;
+  float mdist = length(p - mp);
+
   for (int i = 0; i < 7; i++) {
     float fi = float(i);
     // biased upward: the lower third of the hero belongs to the type
@@ -69,18 +75,36 @@ void main() {
     float amp = 0.030 + 0.015 * sin(fi * 1.7);
     float w = fbm(vec2(p.x * 1.9 + u_time * speed, fi * 3.7 + u_time * 0.04));
     float y = yOff + (w - 0.5) * amp * 2.2;
+
+    // the traces are repelled by the pointer. Direction is normalised smoothly
+    // rather than with sign(), which would tear the line where it crosses the
+    // cursor; the falloff is gaussian in x so the bend has shoulders.
+    float dx = p.x - mp.x;
+    float reach = exp(-dx * dx * 9.0);
+    float lift = y - mp.y;
+    float dir = lift / (abs(lift) + 0.045);
+    float bend = dir * reach * 0.085 * u_influence * exp(-abs(lift) * 2.4);
+    y += bend;
+
     float d = abs(p.y - y);
 
     float core = 0.0016 / (d + 0.0016);
     float glow = 0.013 / (d + 0.013) * 0.48;
 
     float energy = smoothstep(0.36, 0.92, fbm(vec2(p.x * 1.1 - u_time * 0.09, fi * 5.1)));
+    // the trace runs hot where it is being pushed
+    energy = clamp(energy + reach * u_influence * exp(-abs(lift) * 3.0) * 0.55, 0.0, 1.0);
+
     vec3 olive = vec3(0.38, 0.52, 0.20);
     vec3 amber = vec3(0.98, 0.58, 0.14);
     vec3 tint = mix(olive, amber, energy * 0.8);
 
     col += (core * 0.55 + glow) * tint * (0.5 + 0.5 * energy);
   }
+
+  // a soft bloom around the cursor, so the field acknowledges it even between
+  // the traces
+  col += vec3(0.98, 0.58, 0.14) * exp(-mdist * mdist * 34.0) * 0.16 * u_influence;
 
   // a soft refresh wash, not a bar: wide and weak, or it reads as a glitch
   float sweep = fract(u_time * 0.055);
@@ -154,6 +178,8 @@ export default function SignalCanvas({ className }: { className?: string }) {
 
     const uRes = gl.getUniformLocation(program, "u_res");
     const uTime = gl.getUniformLocation(program, "u_time");
+    const uMouse = gl.getUniformLocation(program, "u_mouse");
+    const uInfluence = gl.getUniformLocation(program, "u_influence");
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -177,14 +203,32 @@ export default function SignalCanvas({ className }: { className?: string }) {
     let onScreen = true;
     let looping = false;
 
+    /**
+     * Pointer state lives here rather than in React. The listener only writes
+     * a target; the draw loop eases toward it, so the traces lag the cursor
+     * slightly and settle instead of snapping to it.
+     */
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0, influence: 0, target: 0, seen: false };
+    let rect = canvas.getBoundingClientRect();
+
     const draw = (now: number) => {
       const delta = last ? Math.min(now - last, 64) : 16;
       last = now;
       if (!reduced.matches) elapsed += delta / 1000;
 
+      // frame-rate independent easing, so the feel is the same at 30 and 144Hz
+      const ease = 1 - Math.pow(0.0015, delta / 1000);
+      pointer.x += (pointer.tx - pointer.x) * ease;
+      pointer.y += (pointer.ty - pointer.y) * ease;
+      pointer.influence += (pointer.target - pointer.influence) * ease;
+
       resize();
+      // one layout read per frame, so the pointer listener never does its own
+      rect = canvas.getBoundingClientRect();
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uTime, elapsed);
+      gl.uniform2f(uMouse, pointer.x, pointer.y);
+      gl.uniform1f(uInfluence, reduced.matches ? 0 : pointer.influence);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
       if (reduced.matches || !visible || !onScreen) {
@@ -226,7 +270,38 @@ export default function SignalCanvas({ className }: { className?: string }) {
     );
     observer.observe(canvas);
 
+    // ---- pointer interaction -------------------------------------------
+    // Touch is deliberately excluded: a finger on the hero is a scroll, and
+    // bending the traces under it would fight the gesture.
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "touch" || reduced.matches) return;
+
+      const insideX = event.clientX >= rect.left && event.clientX <= rect.right;
+      const insideY = event.clientY >= rect.top && event.clientY <= rect.bottom;
+
+      pointer.tx = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * canvas.width;
+      // gl_FragCoord counts up from the bottom
+      pointer.ty = (1 - (event.clientY - rect.top) / Math.max(rect.height, 1)) * canvas.height;
+      pointer.target = insideX && insideY ? 1 : 0;
+
+      if (!pointer.seen) {
+        // arrive at the real position instead of sweeping in from the corner
+        pointer.seen = true;
+        pointer.x = pointer.tx;
+        pointer.y = pointer.ty;
+      }
+    };
+
+    const onPointerOut = () => {
+      pointer.target = 0;
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    document.addEventListener("pointerleave", onPointerOut);
+    window.addEventListener("blur", onPointerOut);
+
     const onResize = () => {
+      rect = canvas.getBoundingClientRect();
       if (!looping) requestAnimationFrame(draw);
     };
     window.addEventListener("resize", onResize);
@@ -235,6 +310,9 @@ export default function SignalCanvas({ className }: { className?: string }) {
       stop();
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerleave", onPointerOut);
+      window.removeEventListener("blur", onPointerOut);
       observer.disconnect();
       gl.deleteProgram(program);
       gl.deleteShader(vert);

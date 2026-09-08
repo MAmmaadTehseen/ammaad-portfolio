@@ -20,10 +20,18 @@ export default function ScrambleText({
   text,
   className,
   speed = 26,
+  runKey = null,
 }: {
   text: string;
   className?: string;
   speed?: number;
+  /**
+   * Re-runs the scramble when this changes. Needed because all three bios are
+   * in the DOM for crawlers, so each one's `text` is constant — the trigger is
+   * the panel becoming the visible one. Pass null while hidden so offscreen
+   * copies never animate.
+   */
+  runKey?: string | number | null;
 }) {
   const reduced = useReducedMotion();
   const node = useRef<HTMLSpanElement>(null);
@@ -34,7 +42,7 @@ export default function ScrambleText({
     if (!el) return;
 
     // never scramble on arrival — only on a genuine change of value
-    if (reduced || first.current) {
+    if (reduced || first.current || runKey === null) {
       first.current = false;
       el.textContent = text;
       return;
@@ -68,7 +76,7 @@ export default function ScrambleText({
 
     frame = requestAnimationFrame(run);
     return () => cancelAnimationFrame(frame);
-  }, [text, reduced, speed]);
+  }, [text, reduced, speed, runKey]);
 
   return (
     <span className={className}>

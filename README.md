@@ -71,6 +71,19 @@ Next.js 15 (App Router, fully static) · TypeScript · Tailwind v4 · Motion · 
 The hero trace is a hand-written WebGL fragment shader — a few hundred bytes
 instead of a 3D library.
 
+## Findable
+
+- A generated Open Graph card (`src/app/opengraph-image.tsx`), so a link posted
+  to LinkedIn or X renders as the instrument panel rather than a bare URL.
+- Linked structured data: `WebSite`, `Person`, `ProfilePage` and an `ItemList`
+  of all nine projects with their summaries and stacks. The work is the
+  substance of the site, and this is the channel that describes it to a machine
+  without adding a node to the DOM.
+- All three bios ship in the HTML. Rendering only the selected channel kept two
+  thirds of the writing — the keyword-dense two thirds — away from crawlers.
+- The `h1` carries the full name and role for readers and crawlers; the six-letter
+  wordmark beside it is decoration.
+
 ## Craft notes
 
 - **Contrast is verified, not guessed.** Ink 17:1, muted 7.7:1, dim 5.4:1,
@@ -82,7 +95,11 @@ instead of a 3D library.
   removes the boot panel, so the page is fully readable if scripts never run.
 - **The boot sequence runs once per session**, gated by a pre-paint inline script
   so a repeat visitor never sees it flash in and out.
-- The shader stops on `visibilitychange` and caps DPR at 1.5.
+- **Animation cost is measured, not assumed.** Against the first build, on a
+  full-page scroll: 2.2 -> 10.8 average FPS, canvas fill down 64%, running
+  animations 14 -> 4, DOM nodes 710 -> 568. The shader stops dead when the hero
+  leaves the viewport (verified at zero draw calls) and resumes on the way back.
+- Nothing animates a blur filter, and the pointer never renders React.
 
 ## Deploying
 

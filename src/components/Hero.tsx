@@ -92,10 +92,12 @@ export default function Hero() {
         </div>
 
         {/* the name, machined out of the panel one letter at a time */}
-        <h1
-          className="u-display text-ink flex flex-wrap text-[clamp(2.75rem,14vw,11rem)]"
-          aria-label={profile.name}
-        >
+        <h1 className="u-display text-ink flex flex-wrap text-[clamp(2.75rem,14vw,11rem)]">
+          {/* the visible wordmark is six letters; the heading a crawler and a
+              screen reader read is the whole name and what he actually does */}
+          <span className="sr-only">
+            {profile.name} — {profile.role}, {profile.discipline}, {profile.location}
+          </span>
           {letters.map((letter, index) => (
             <span key={`${letter}-${index}`} className="overflow-hidden pb-[0.06em]" aria-hidden>
               <motion.span

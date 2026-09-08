@@ -346,7 +346,9 @@ export const stackGroups: { label: string; note: string; items: string[] }[] = [
 ];
 
 export const meta = {
-  title: "Ammaad Tehseen — Full-stack engineer",
+  /** Under ~60 characters so Google shows it whole; name first, because the
+   *  highest-intent search for a portfolio is the person's own name. */
+  title: "Ammaad Tehseen — Full-stack Engineer, Lahore",
   description:
-    "Full-stack engineer in Lahore building the systems products run on: billing lifecycles, retrieval pipelines, real-time presence and the admin tooling that keeps it all honest.",
+    "Muhammad Ammaad Tehseen is a full-stack engineer in Lahore, Pakistan working in TypeScript, Node.js, Next.js, Prisma and PostgreSQL. Billing lifecycles, RAG pipelines, real-time systems, and the admin tooling that keeps them honest.",
 };
