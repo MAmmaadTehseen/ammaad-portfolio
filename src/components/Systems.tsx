@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   AnimatePresence,
   motion,
@@ -295,6 +296,7 @@ export default function Systems() {
                 }}
                 className="border-line-soft border-b"
               >
+                <div className="flex items-center gap-3">
                 <button
                   onClick={() => setActiveIndex(index)}
                   onMouseEnter={() => setActiveIndex(index)}
@@ -340,6 +342,20 @@ export default function Systems() {
                     <TierChip tier={project.tier} />
                   </span>
                 </button>
+
+                {/* the panel is a button, so the link to the project's own page
+                    sits beside it rather than inside it — nesting an anchor in
+                    a button is invalid, and these nine links are how a crawler
+                    reaches every project */}
+                <Link
+                  href={`/work/${project.id}`}
+                  data-cursor="Open"
+                  aria-label={`${project.name} — full detail`}
+                  className="u-mono text-dim hover:text-signal shrink-0 px-1 text-sm transition-colors"
+                >
+                  ↗
+                </Link>
+                </div>
 
                 {/* below lg the detail lives inline, under the row it belongs to */}
                 {readout !== "sticky" && (

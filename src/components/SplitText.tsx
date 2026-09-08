@@ -7,15 +7,18 @@ import { motion } from "motion/react";
  * Word-level mask reveal. Each word rides up out of its own clipped box, which
  * reads as type being machined into the panel rather than fading in.
  *
- * Two things here are deliberate:
+ * The trigger lives on the outer wrapper, not on the words.
  *
- * 1. The separating space is a text node *between* the clip boxes, not inside
- *    them. A trailing space inside an inline-block is collapsed away, which
- *    runs every word together; keeping it outside also lets the heading wrap
- *    normally, which a non-breaking space would prevent.
- * 2. There is no useReducedMotion branch. Rendering a different tree on the
- *    client than the server is a hydration mismatch, so the motion is pinned
- *    by a `[data-split]` rule in globals.css instead.
+ * That is not a style choice. Each word starts translated 112% down, which puts
+ * it entirely outside its own `overflow: hidden` clip box — and an
+ * IntersectionObserver measures an element against its ancestors' clip rects, so
+ * a clipped word reports a 0% intersection ratio forever and `whileInView` never
+ * fires. Observing the wrapper, which is in normal flow and unclipped, and
+ * driving the words through variants, is what makes the reveal actually run.
+ *
+ * Reduced motion is pinned by a `[data-split]` rule in globals.css rather than
+ * branched here, which would render a different tree on the client than the
+ * server.
  */
 export default function SplitText({
   text,
@@ -33,7 +36,18 @@ export default function SplitText({
   const words = text.split(" ");
 
   return (
-    <span className={className} data-split aria-label={text}>
+    <motion.span
+      className={className}
+      data-split
+      aria-label={text}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={{
+        hidden: {},
+        show: { transition: { staggerChildren: stagger, delayChildren: delay } },
+      }}
+    >
       {words.map((word, index) => (
         <Fragment key={`${word}-${index}`}>
           <span
@@ -43,21 +57,19 @@ export default function SplitText({
           >
             <motion.span
               className="inline-block will-change-transform"
-              initial={{ y: "112%" }}
-              whileInView={{ y: "0%" }}
-              viewport={{ once: true, amount: 0.35 }}
-              transition={{
-                duration,
-                delay: delay + index * stagger,
-                ease: [0.16, 1, 0.3, 1],
+              variants={{
+                hidden: { y: "112%" },
+                show: { y: "0%", transition: { duration, ease: [0.16, 1, 0.3, 1] } },
               }}
             >
               {word}
             </motion.span>
           </span>
+          {/* the separating space sits outside the clip box: inside, it is
+              collapsed away and every word runs together */}
           {index < words.length - 1 ? " " : null}
         </Fragment>
       ))}
-    </span>
+    </motion.span>
   );
 }

@@ -1,23 +1,41 @@
 import { ImageResponse } from "next/og";
-import { profile } from "@/content/site";
+import { TIERS, profile, projects } from "@/content/site";
 import { OG, OG_CONTENT_TYPE, OG_SIZE, loadOgFonts } from "@/lib/og";
 
-export const alt = `${profile.name} — ${profile.role} in ${profile.location}`;
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
-/**
- * The share card. Without one, every link posted to LinkedIn, X or WhatsApp
- * renders as a bare URL, which is the difference between a click and a scroll
- * past.
- *
- * Same instrument panel as the site: anodised olive, machined type, one amber
- * signal. Drawn with plain boxes so it renders identically wherever it is
- * generated.
- */
+export function generateStaticParams() {
+  return projects.map((project) => ({ slug: project.id }));
+}
 
-export default async function OpengraphImage() {
+export async function generateImageMetadata({ params }: { params: { slug: string } }) {
+  const project = projects.find((entry) => entry.id === params.slug);
+  return [
+    {
+      id: params.slug,
+      size: OG_SIZE,
+      contentType: OG_CONTENT_TYPE,
+      alt: project ? `${project.name} — ${profile.name}` : profile.name,
+    },
+  ];
+}
+
+/** A share card per project, so a link to one reads as that project rather than
+ *  as the site in general. */
+export default async function ProjectOgImage({ params }: { params: { slug: string } }) {
+  const project = projects.find((entry) => entry.id === params.slug);
   const { fonts, displayFont, monoFont } = await loadOgFonts();
+
+  if (!project) {
+    return new ImageResponse(
+      <div style={{ width: "100%", height: "100%", background: OG.bg }} />,
+      OG_SIZE,
+    );
+  }
+
+  const tierColor =
+    project.tier === "live" ? OG.primary : project.tier === "open" ? OG.muted : OG.signal;
 
   return new ImageResponse(
     (
@@ -30,29 +48,11 @@ export default async function OpengraphImage() {
           justifyContent: "space-between",
           background: OG.bg,
           padding: 64,
-          position: "relative",
         }}
       >
-        {/* signal traces, flattened into static bands */}
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: 70 + i * 46,
-              height: 2,
-              background: i === 2 ? OG.primary : OG.line,
-              opacity: i === 2 ? 0.55 : 0.9,
-            }}
-          />
-        ))}
-
-        {/* top row */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 12, height: 12, borderRadius: 999, background: OG.signal }} />
+            <div style={{ width: 12, height: 12, borderRadius: 999, background: tierColor }} />
             <div
               style={{
                 fontFamily: monoFont,
@@ -62,42 +62,41 @@ export default async function OpengraphImage() {
                 textTransform: "uppercase",
               }}
             >
-              {profile.available ? "Available for work" : "Read-out"}
+              {TIERS[project.tier].label}
             </div>
           </div>
           <div style={{ fontFamily: monoFont, fontSize: 20, letterSpacing: 3, color: OG.dim }}>
-            {profile.location.toUpperCase()}
+            {project.year.toUpperCase()}
           </div>
         </div>
 
-        {/* the name */}
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div
             style={{
               fontFamily: displayFont,
-              fontSize: 132,
-              lineHeight: 1,
-              letterSpacing: -4,
+              fontSize: project.name.length > 26 ? 76 : 104,
+              lineHeight: 1.03,
+              letterSpacing: -3,
               color: OG.ink,
               display: "flex",
             }}
           >
-            AMMAAD TEHSEEN
+            {project.name}
           </div>
           <div
             style={{
-              marginTop: 26,
+              marginTop: 24,
               fontFamily: displayFont,
-              fontSize: 36,
+              fontSize: 28,
               color: OG.muted,
               display: "flex",
+              maxWidth: 980,
             }}
           >
-            Full-stack engineer — billing, queues, real-time, retrieval.
+            {project.lede.recruiter.slice(0, 150)}
           </div>
         </div>
 
-        {/* bottom row */}
         <div
           style={{
             display: "flex",
@@ -107,8 +106,8 @@ export default async function OpengraphImage() {
             paddingTop: 24,
           }}
         >
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", maxWidth: 780 }}>
-            {["TypeScript", "Node", "Next.js", "Prisma", "PostgreSQL", "Redis"].map((tech) => (
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", maxWidth: 800 }}>
+            {project.stack.slice(0, 6).map((tech) => (
               <div
                 key={tech}
                 style={{
@@ -123,7 +122,9 @@ export default async function OpengraphImage() {
               </div>
             ))}
           </div>
-          <div style={{ fontFamily: monoFont, fontSize: 22, color: OG.signal }}>ammaad.online</div>
+          <div style={{ fontFamily: monoFont, fontSize: 20, color: OG.signal }}>
+            ammaad.online
+          </div>
         </div>
       </div>
     ),
