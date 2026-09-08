@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useReducedMotion } from "motion/react";
 
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\<>=+*#";
@@ -9,8 +9,12 @@ const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\<>=+*#";
  * Retunes text the way a readout settles on a value. Used only where the copy
  * genuinely changes (the channel switch), never as decoration on static text.
  *
- * The real string is always in the DOM for screen readers and for search; only
- * the visible layer scrambles.
+ * The frames are written straight to a text node rather than through state.
+ * Scrambling a heading through React would re-render the subtree forty times
+ * for one word change; the DOM write is the whole job, so it does only that.
+ *
+ * The real string is rendered by React and is what the server sends, so search
+ * and screen readers always see the finished text.
  */
 export default function ScrambleText({
   text,
@@ -22,44 +26,55 @@ export default function ScrambleText({
   speed?: number;
 }) {
   const reduced = useReducedMotion();
-  const [display, setDisplay] = useState(text);
+  const node = useRef<HTMLSpanElement>(null);
   const first = useRef(true);
 
   useEffect(() => {
+    const el = node.current;
+    if (!el) return;
+
+    // never scramble on arrival — only on a genuine change of value
     if (reduced || first.current) {
       first.current = false;
-      setDisplay(text);
+      el.textContent = text;
       return;
     }
 
+    const chars = text.split("");
+    const steps = Math.max(8, Math.ceil(chars.length * 0.6));
     let frame = 0;
-    let tick = 0;
-    const total = Math.max(8, Math.ceil(text.length * 0.6));
+    let startedAt = 0;
 
-    const run = () => {
-      tick += 1;
-      const progress = tick / total;
-      const settled = Math.floor(text.length * progress);
-      setDisplay(
-        text
-          .split("")
-          .map((char, index) => {
-            if (index < settled || char === " ") return char;
-            return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
-          })
-          .join(""),
-      );
-      if (tick < total) frame = window.setTimeout(run, speed);
-      else setDisplay(text);
+    const run = (now: number) => {
+      if (!startedAt) startedAt = now;
+      const step = Math.floor((now - startedAt) / speed);
+
+      if (step >= steps) {
+        el.textContent = text;
+        return;
+      }
+
+      const settled = Math.floor(chars.length * (step / steps));
+      let out = "";
+      for (let i = 0; i < chars.length; i += 1) {
+        out +=
+          i < settled || chars[i] === " "
+            ? chars[i]
+            : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+      }
+      el.textContent = out;
+      frame = requestAnimationFrame(run);
     };
 
-    frame = window.setTimeout(run, speed);
-    return () => window.clearTimeout(frame);
+    frame = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(frame);
   }, [text, reduced, speed]);
 
   return (
     <span className={className}>
-      <span aria-hidden>{display}</span>
+      <span ref={node} aria-hidden>
+        {text}
+      </span>
       <span className="sr-only">{text}</span>
     </span>
   );

@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import type { FlowEdge, FlowNode } from "@/content/site";
+import { useInView } from "@/lib/useInView";
 
 /**
  * The architecture, drawn rather than screenshotted. This is what stands in
@@ -65,10 +66,13 @@ export default function FlowDiagram({
   className?: string;
 }) {
   const reduced = useReducedMotion();
+  // packets are a compositor animation per edge; three screens away they are
+  // pure battery drain
+  const [wrapRef, inView] = useInView<HTMLDivElement>("150px");
   const byId = new Map(nodes.map((node) => [node.id, node]));
 
   return (
-    <div className={`-mx-1 overflow-x-auto pb-2 ${className ?? ""}`}>
+    <div ref={wrapRef} className={`-mx-1 overflow-x-auto pb-2 ${className ?? ""}`}>
       <svg
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         className="h-auto w-full min-w-[680px]"
@@ -129,6 +133,7 @@ export default function FlowDiagram({
                 style={{
                   animation: `flow-pulse 3.4s linear infinite`,
                   animationDelay: `${index * 0.42}s`,
+                  animationPlayState: inView ? "running" : "paused",
                 }}
               />
 

@@ -7,8 +7,18 @@ import { useEffect, useRef } from "react";
  * noise, with an amber energy term that flares where the noise peaks.
  *
  * Raw WebGL on purpose — a shader is a few hundred bytes where a 3D library
- * would be a few hundred kilobytes. Freezes on a single frame for
- * reduced-motion users, and stops entirely when the tab is hidden.
+ * would be a few hundred kilobytes.
+ *
+ * Cost control, in order of how much each one saves:
+ *
+ * 1. The backing store renders at a fraction of CSS pixels. Every feature here
+ *    is a soft glow, so there is nothing for the extra resolution to resolve;
+ *    it is pure fill-rate. This is the single biggest saving.
+ * 2. Three fBm octaves rather than five. The traces are wide and slow, so the
+ *    top two octaves were riding below the visible amplitude.
+ * 3. The loop stops when the hero leaves the viewport and when the tab is
+ *    hidden. Time accumulates only while running, so resuming continues the
+ *    animation instead of jumping.
  */
 
 const VERT = `
@@ -17,7 +27,7 @@ void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
 `;
 
 const FRAG = `
-precision highp float;
+precision mediump float;
 uniform vec2 u_res;
 uniform float u_time;
 
@@ -32,10 +42,12 @@ float noise(vec2 p) {
              mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
 }
 
+// three octaves: the fourth and fifth sat below the amplitude these traces
+// actually show, so they cost fill rate and rendered nothing
 float fbm(vec2 p) {
   float v = 0.0;
   float a = 0.5;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 3; i++) {
     v += a * noise(p);
     p *= 2.02;
     a *= 0.5;
@@ -86,6 +98,11 @@ void main() {
 }
 `;
 
+/** Fraction of a CSS pixel actually rendered. Everything on screen is a soft
+ *  glow, so this is invisible and roughly quadratic in cost. */
+const RES_SCALE = 0.6;
+const MAX_DPR = 1.25;
+
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
   const shader = gl.createShader(type);
   if (!shader) return null;
@@ -110,7 +127,10 @@ export default function SignalCanvas({ className }: { className?: string }) {
       premultipliedAlpha: false,
       antialias: false,
       depth: false,
-    });
+      stencil: false,
+      powerPreference: "low-power",
+      desynchronized: true,
+    } as WebGLContextAttributes);
     if (!gl) return; // no WebGL: the section simply reads as a plain panel
 
     const vert = compile(gl, gl.VERTEX_SHADER, VERT);
@@ -139,10 +159,9 @@ export default function SignalCanvas({ className }: { className?: string }) {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     const resize = () => {
-      // capped DPR: this is a soft background, not a texture worth 3x pixels
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      const width = Math.max(1, Math.floor(canvas.clientWidth * dpr));
-      const height = Math.max(1, Math.floor(canvas.clientHeight * dpr));
+      const scale = Math.min(window.devicePixelRatio || 1, MAX_DPR) * RES_SCALE;
+      const width = Math.max(1, Math.round(canvas.clientWidth * scale));
+      const height = Math.max(1, Math.round(canvas.clientHeight * scale));
       if (canvas.width === width && canvas.height === height) return;
       canvas.width = width;
       canvas.height = height;
@@ -150,46 +169,78 @@ export default function SignalCanvas({ className }: { className?: string }) {
     };
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
     let frame = 0;
-    let running = true;
-    const start = performance.now();
+    let elapsed = reduced.matches ? 12 : 0; // reduced motion gets one composed frame
+    let last = 0;
+    let visible = true;
+    let onScreen = true;
+    let looping = false;
 
     const draw = (now: number) => {
+      const delta = last ? Math.min(now - last, 64) : 16;
+      last = now;
+      if (!reduced.matches) elapsed += delta / 1000;
+
       resize();
       gl.uniform2f(uRes, canvas.width, canvas.height);
-      // reduced motion gets one composed frame, not a frozen black box
-      gl.uniform1f(uTime, reduced.matches ? 12 : (now - start) / 1000);
+      gl.uniform1f(uTime, elapsed);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      if (!reduced.matches && running) frame = requestAnimationFrame(draw);
+
+      if (reduced.matches || !visible || !onScreen) {
+        looping = false;
+        return;
+      }
+      frame = requestAnimationFrame(draw);
     };
 
-    frame = requestAnimationFrame(draw);
+    const start = () => {
+      if (looping) return;
+      looping = true;
+      last = 0; // never bill the pause to the clock
+      frame = requestAnimationFrame(draw);
+    };
+
+    const stop = () => {
+      looping = false;
+      cancelAnimationFrame(frame);
+    };
+
+    start();
 
     const onVisibility = () => {
-      if (document.hidden) {
-        running = false;
-        cancelAnimationFrame(frame);
-      } else if (!running) {
-        running = true;
-        frame = requestAnimationFrame(draw);
-      }
+      visible = !document.hidden;
+      if (visible && onScreen) start();
+      else stop();
     };
     document.addEventListener("visibilitychange", onVisibility);
 
-    const observer = new ResizeObserver(() => {
-      if (reduced.matches) requestAnimationFrame(draw);
-    });
+    // the hero is one screen tall; once it is gone there is nothing to draw
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen && visible) start();
+        else stop();
+      },
+      { rootMargin: "80px" },
+    );
     observer.observe(canvas);
 
+    const onResize = () => {
+      if (!looping) requestAnimationFrame(draw);
+    };
+    window.addEventListener("resize", onResize);
+
     return () => {
-      running = false;
-      cancelAnimationFrame(frame);
+      stop();
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("resize", onResize);
       observer.disconnect();
       gl.deleteProgram(program);
       gl.deleteShader(vert);
       gl.deleteShader(frag);
       gl.deleteBuffer(buffer);
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, []);
 

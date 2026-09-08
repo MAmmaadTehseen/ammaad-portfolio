@@ -50,8 +50,8 @@ const panelVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.45, ease: EASE } },
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
 };
 
 function Detail({ project, channel }: { project: Project; channel: Channel }) {
@@ -171,6 +171,13 @@ export default function Systems() {
   const { channel } = useChannel();
   const [activeIndex, setActiveIndex] = useState(0);
   const active = projects[activeIndex] ?? projects[0];
+  /**
+   * "both" until the media query has been read on the client. Rendering both
+   * matches the server and keeps the page correct with no JS; the effect then
+   * prunes the one CSS was only hiding, which is an entire duplicate panel,
+   * architecture diagram and set of packet animations.
+   */
+  const [readout, setReadout] = useState<"both" | "inline" | "sticky">("both");
 
   const rows = useRef<(HTMLLIElement | null)[]>([]);
   const centers = useRef<number[]>([]);
@@ -196,6 +203,7 @@ export default function Systems() {
     // under the reader's thumb, so scroll-driving is desktop-only
     const sync = () => {
       scrollDriven.current = desktop.matches;
+      setReadout(desktop.matches ? "sticky" : "inline");
       measure();
     };
     sync();
@@ -334,26 +342,30 @@ export default function Systems() {
                 </button>
 
                 {/* below lg the detail lives inline, under the row it belongs to */}
-                <div className="min-w-0 lg:hidden">
-                  <AnimatePresence mode="wait" initial={false}>
-                    {isActive && (
-                      <div className="pb-6">
-                        <Detail project={project} channel={channel} />
-                      </div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                {readout !== "sticky" && (
+                  <div className="min-w-0 lg:hidden">
+                    <AnimatePresence mode="wait" initial={false}>
+                      {isActive && (
+                        <div className="pb-6">
+                          <Detail project={project} channel={channel} />
+                        </div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
               </li>
             );
           })}
         </motion.ul>
 
         {/* the readout */}
-        <div className="hidden min-w-0 lg:block">
-          <div className="sticky top-24">
-            <Detail key={`${active.id}-${channel}`} project={active} channel={channel} />
+        {readout !== "inline" && (
+          <div className="hidden min-w-0 lg:block">
+            <div className="sticky top-24">
+              <Detail key={`${active.id}-${channel}`} project={active} channel={channel} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

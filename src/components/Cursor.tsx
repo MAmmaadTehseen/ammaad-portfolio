@@ -3,23 +3,37 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring } from "motion/react";
 
+const TARGETS = "[data-cursor], a, button, [role='button']";
+
 /**
  * A crosshair reticle instead of a pointer. Only mounts where there is a real
  * pointer and motion is welcome; everywhere else the OS cursor is left alone.
  *
  * Any element can retarget it:   <a data-cursor="Open source">
+ *
+ * Position rides motion values, so pointer movement never renders React. State
+ * is touched only when something actually changes — a new hover target, the
+ * pointer entering or leaving the window — which is a few times a minute rather
+ * than a few hundred times a second.
  */
 export default function Cursor() {
   const [enabled, setEnabled] = useState(false);
   const [locked, setLocked] = useState(false);
   const [label, setLabel] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
-  const raw = { x: useMotionValue(-100), y: useMotionValue(-100) };
+
+  const x = useMotionValue(-100);
+  const y = useMotionValue(-100);
   const ring = {
-    x: useSpring(raw.x, { stiffness: 480, damping: 42, mass: 0.7 }),
-    y: useSpring(raw.y, { stiffness: 480, damping: 42, mass: 0.7 }),
+    x: useSpring(x, { stiffness: 480, damping: 42, mass: 0.7 }),
+    y: useSpring(y, { stiffness: 480, damping: 42, mass: 0.7 }),
   };
-  const frame = useRef(0);
+
+  // mirrors of the state above, so the hot path can compare without re-rendering
+  const lastEl = useRef<EventTarget | null>(null);
+  const lockedRef = useRef(false);
+  const labelRef = useRef<string | null>(null);
+  const visibleRef = useRef(false);
 
   useEffect(() => {
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -30,35 +44,46 @@ export default function Cursor() {
     document.documentElement.classList.add("has-cursor");
 
     const onMove = (event: PointerEvent) => {
-      cancelAnimationFrame(frame.current);
-      frame.current = requestAnimationFrame(() => {
-        raw.x.set(event.clientX);
-        raw.y.set(event.clientY);
+      // motion values are already batched to the next frame internally
+      x.set(event.clientX);
+      y.set(event.clientY);
+
+      if (!visibleRef.current) {
+        visibleRef.current = true;
         setVisible(true);
-      });
-
-      const target = (event.target as HTMLElement | null)?.closest?.(
-        "[data-cursor], a, button, [role='button']",
-      ) as HTMLElement | null;
-
-      if (!target) {
-        setLocked(false);
-        setLabel(null);
-        return;
       }
-      setLocked(true);
-      setLabel(target.dataset.cursor ?? null);
+
+      // most moves stay over the same element; only walk the tree when it changes
+      if (event.target === lastEl.current) return;
+      lastEl.current = event.target;
+
+      const hit = (event.target as HTMLElement | null)?.closest?.(TARGETS) as HTMLElement | null;
+      const nextLocked = Boolean(hit);
+      const nextLabel = hit?.dataset.cursor ?? null;
+
+      if (nextLocked !== lockedRef.current) {
+        lockedRef.current = nextLocked;
+        setLocked(nextLocked);
+      }
+      if (nextLabel !== labelRef.current) {
+        labelRef.current = nextLabel;
+        setLabel(nextLabel);
+      }
     };
 
-    const onLeave = () => setVisible(false);
-    const onEnter = () => setVisible(true);
+    const setSeen = (seen: boolean) => () => {
+      if (visibleRef.current === seen) return;
+      visibleRef.current = seen;
+      setVisible(seen);
+    };
+    const onLeave = setSeen(false);
+    const onEnter = setSeen(true);
 
     window.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerleave", onLeave);
     document.addEventListener("pointerenter", onEnter);
 
     return () => {
-      cancelAnimationFrame(frame.current);
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("pointerenter", onEnter);
@@ -100,7 +125,7 @@ export default function Cursor() {
       {/* centre dot tracks the raw pointer with no lag at all */}
       <motion.div
         className="absolute top-0 left-0"
-        style={{ x: raw.x, y: raw.y }}
+        style={{ x, y }}
         animate={{ opacity: visible && !locked ? 1 : 0 }}
         transition={{ duration: 0.12 }}
       >

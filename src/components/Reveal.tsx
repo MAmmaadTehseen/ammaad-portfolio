@@ -27,10 +27,13 @@ export default function Reveal({ children, delay = 0, y = 22, className, as = "d
     <Tag
       data-reveal
       className={className}
-      initial={{ opacity: 0, y, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      // transform and opacity only — an animated blur filter forces a fresh
+      // raster of the whole subtree on every frame, which is the most expensive
+      // thing a reveal can possibly do for the least visible gain
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15, margin: "0px 0px -8% 0px" }}
-      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.75, delay, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </Tag>
