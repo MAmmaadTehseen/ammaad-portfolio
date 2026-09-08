@@ -34,7 +34,14 @@ export const profile = {
   available: true,
   availableNote: "Open to contract and full-time work",
   email: "ammadtehseenkhan@gmail.com",
-  site: "https://ammaad.online",
+  /**
+   * Must be the host that actually serves the site, not the one that redirects
+   * to it. Vercel is set up apex -> www, and canonical, OG image, sitemap and
+   * robots all derive from this line — an og:image on the redirecting host
+   * answers 308 rather than a PNG, and several social scrapers will not follow
+   * that. Flip Vercel to make the bare domain primary and change this back.
+   */
+  site: "https://www.ammaad.online",
   socials: [
     { label: "GitHub", href: "https://github.com/MAmmaadTehseen", handle: "MAmmaadTehseen" },
     { label: "X", href: "https://x.com/MAmmaadTehseen", handle: "@MAmmaadTehseen" },
