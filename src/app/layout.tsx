@@ -6,6 +6,7 @@ import Boot from "@/components/Boot";
 import Cursor from "@/components/Cursor";
 import Nav from "@/components/Nav";
 import SmoothScroll from "@/components/SmoothScroll";
+import SiteFooter from "@/components/SiteFooter";
 import { bio, capabilities, meta, profile, projects, stackGroups } from "@/content/site";
 
 const archivo = Archivo({
@@ -169,7 +170,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SmoothScroll />
           <Cursor />
           <Nav />
-          <main>{children}</main>
+          <div className="flex min-h-screen flex-col">
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+          </div>
         </ChannelProvider>
       </body>
     </html>

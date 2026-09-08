@@ -45,6 +45,57 @@ export const profile = {
   socials: [
     { label: "GitHub", href: "https://github.com/MAmmaadTehseen", handle: "MAmmaadTehseen" },
     { label: "X", href: "https://x.com/MAmmaadTehseen", handle: "@MAmmaadTehseen" },
+    /* ------------------------------------------------------------------
+       LINKEDIN — uncomment this line and paste your profile URL. It then
+       appears in the nav footer, the contact page and the JSON-LD `sameAs`
+       automatically. Left out rather than guessed, because a wrong profile
+       link is worse than no link.
+       ------------------------------------------------------------------ */
+    // { label: "LinkedIn", href: "https://www.linkedin.com/in/YOUR-HANDLE", handle: "in/YOUR-HANDLE" },
+  ],
+};
+
+/** The About page. Longer form than the home page's three-channel bio. */
+export const about = {
+  lede: "I build the half of a product that has to keep working after launch.",
+  body: [
+    "Most of what I ship is not the screen you see. It is the subscription that renews correctly at 3am, the webhook that arrives twice and only counts once, the migration that runs against a database nobody can afford to reset, the queue that quietly retries until the email actually lands. That work is invisible when it goes right and extremely visible when it does not.",
+    "I work across the whole stack because the interesting bugs live in the seams. A billing edge case is a product decision, a database constraint and a UI state at the same time — splitting that across three people mostly produces three partial answers. Being able to follow a problem from a button through an API and a queue down to a row is the point.",
+  ],
+  approach: [
+    {
+      title: "The boring layers, on purpose",
+      body: "Repository and service split, validation at every boundary, one transport per concern, observers instead of edits scattered through call sites. None of it is clever. It is what makes the clever parts survivable six months later.",
+    },
+    {
+      title: "Instrument it before you need it",
+      body: "Logging every send, mirroring the billing lifecycle into a table you can query, deriving activity from real connections rather than a field someone forgot to update. When something breaks at 3am, the difference between a five-minute fix and a five-hour one is whether you can see what happened.",
+    },
+    {
+      title: "Production is not a staging environment",
+      body: "Hand-written idempotent migrations, changes that can be rolled forward, and a healthy suspicion of anything that only works because the data happens to be clean today.",
+    },
+  ],
+  now: [
+    "Building and maintaining an AI learning and community platform end to end — billing, retrieval, real-time, analytics and admin tooling.",
+    "Designing a cross-department early warning system that watches everyday work tools and routes real problems to the right manager.",
+    "Open to contract and full-time work, remote, across any timezone.",
+  ],
+};
+
+/** The Contact page. */
+export const contact = {
+  lede: "Tell me what is breaking, or what you want built.",
+  body: "I read everything and reply to anything specific. Email is the surest route — I am not reliably on any other channel.",
+  helpful: [
+    "What the thing does, and who it is for",
+    "Where it is stuck — a bug, a rebuild, a feature nobody has time for, or a blank page",
+    "Roughly when you need it, and whether there is a budget",
+    "A link to the code, the product, or a screenshot — anything concrete beats a description",
+  ],
+  honest: [
+    "If it is a two-week project and I cannot do it justice, I will say so rather than take it.",
+    "If you need a designer more than an engineer, I will tell you that too.",
   ],
 };
 

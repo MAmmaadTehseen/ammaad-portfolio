@@ -11,6 +11,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 1,
     },
+    ...["/work", "/about", "/contact"].map((path) => ({
+      url: `${profile.site}${path}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.9,
+    })),
     ...projects.map((project) => ({
       url: `${profile.site}/work/${project.id}`,
       lastModified: now,

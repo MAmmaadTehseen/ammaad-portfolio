@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion, useScroll, useSpring } from "motion/react";
 import { profile } from "@/content/site";
 
+// real routes rather than home-page anchors, so the nav works identically from
+// a project page as from the home page
 const LINKS = [
-  { label: "Index", href: "#index" },
-  { label: "Work", href: "#work" },
-  { label: "Stack", href: "#stack" },
-  { label: "Contact", href: "#contact" },
+  { label: "Work", href: "/work" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 function LocalTime() {
@@ -54,25 +56,25 @@ export default function Nav() {
       />
 
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-3 sm:px-8">
-        <a href="#top" className="group flex items-center gap-2.5" data-cursor="Top">
+        <Link href="/" className="group flex items-center gap-2.5" data-cursor="Home">
           <span className={`u-led ${profile.available ? "u-led-live" : ""}`} aria-hidden />
           <span className="u-mono text-ink text-[11px] tracking-[0.14em] uppercase">
             {profile.short}
           </span>
-        </a>
+        </Link>
 
         <div className="flex items-center gap-5 sm:gap-7">
           <LocalTime />
           <ul className="flex items-center gap-4 sm:gap-6">
             {LINKS.map((link) => (
               <li key={link.href}>
-                <a
+                <Link
                   href={link.href}
                   data-cursor={link.label}
                   className="u-mono text-muted hover:text-ink text-[11px] tracking-[0.12em] uppercase transition-colors duration-200"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
