@@ -168,7 +168,7 @@ function Detail({ project, channel }: { project: Project; channel: Channel }) {
   );
 }
 
-export default function Systems() {
+export default function Systems({ heading = true }: { heading?: boolean }) {
   const { channel } = useChannel();
   const [activeIndex, setActiveIndex] = useState(0);
   const active = projects[activeIndex] ?? projects[0];
@@ -242,15 +242,19 @@ export default function Systems() {
     <section id="work" className="mx-auto max-w-[1400px] scroll-mt-24 px-5 py-24 sm:px-8 sm:py-32">
       <div className="border-line-soft mb-12 flex flex-wrap items-end justify-between gap-6 border-b pb-6">
         <div>
-          <h2 className="u-display text-ink text-[clamp(2.25rem,6vw,4.5rem)]">
-            <SplitText text="Work" />
-          </h2>
-          <p className="text-muted u-prose mt-3 text-sm">
-            Nine builds, disclosed at three depths. <span className="text-ink">Open</span> means you
-            can read the source, <span className="text-ink">Live</span> means it is running for
-            someone right now, and <span className="text-ink">Closed</span> means the source is
-            private — so you get the architecture instead of a screenshot.
-          </p>
+          {heading && (
+            <>
+              <h2 className="u-display text-ink text-[clamp(2.25rem,6vw,4.5rem)]">
+                <SplitText text="Work" />
+              </h2>
+              <p className="text-muted u-prose mt-3 text-sm">
+                Nine builds, disclosed at three depths. <span className="text-ink">Open</span> means
+                you can read the source, <span className="text-ink">Live</span> means it is running
+                for someone right now, and <span className="text-ink">Closed</span> means the source
+                is private — so you get the architecture instead of a screenshot.
+              </p>
+            </>
+          )}
         </div>
 
         <div className="flex flex-col items-start gap-4 lg:items-end">

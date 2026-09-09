@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion, useScroll, useSpring } from "motion/react";
+import { usePathname } from "next/navigation";
+import { motion, useMotionValueEvent, useScroll, useSpring } from "motion/react";
 import { profile } from "@/content/site";
 
 // real routes rather than home-page anchors, so the nav works identically from
@@ -39,14 +40,46 @@ function LocalTime() {
   );
 }
 
+/** Ignore sub-pixel jitter and trackpad noise; only a deliberate move counts. */
+const DIRECTION_THRESHOLD = 6;
+/** Above this, the page is "at the top" and the header defers to the hero. */
+const TOP_ZONE = 90;
+
 export default function Nav() {
-  const { scrollYProgress } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 220, damping: 40, mass: 0.4 });
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
+  // Hidden while reading downward, back on the first flick upward. At the very
+  // top of the home page it stays out of the way entirely, so the hero is the
+  // whole screen rather than a hero with a bar across it.
+  const [hidden, setHidden] = useState(false);
+  const previous = useRef(0);
+
+  useEffect(() => {
+    setHidden(isHome && window.scrollY < TOP_ZONE);
+    previous.current = window.scrollY;
+  }, [isHome]);
+
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const delta = y - previous.current;
+    if (Math.abs(delta) < DIRECTION_THRESHOLD) return;
+    previous.current = y;
+
+    if (y < TOP_ZONE) {
+      setHidden(isHome);
+      return;
+    }
+    setHidden(delta > 0);
+  });
 
   return (
-    <header
+    <motion.header
       className="border-line-soft bg-bg/80 fixed inset-x-0 top-0 border-b backdrop-blur-md"
       style={{ zIndex: "var(--z-nav)" }}
+      animate={{ y: hidden ? "-102%" : "0%" }}
+      transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
     >
       {/* the scroll position, read as a signal level */}
       <motion.div
@@ -80,6 +113,6 @@ export default function Nav() {
           </ul>
         </div>
       </nav>
-    </header>
+    </motion.header>
   );
 }

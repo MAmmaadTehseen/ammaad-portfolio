@@ -110,26 +110,34 @@ export default function Cursor() {
       >
         <motion.div
           className="relative -translate-x-1/2 -translate-y-1/2"
-          animate={{ width: locked ? 46 : 26, height: locked ? 46 : 26, rotate: locked ? 45 : 0 }}
+          animate={{ width: locked ? 64 : 38, height: locked ? 64 : 38, rotate: locked ? 45 : 0 }}
           transition={{ type: "spring", stiffness: 420, damping: 34 }}
         >
-          <span className="absolute inset-0 border border-signal/70" />
+          <span className="border-signal/80 absolute inset-0 border" />
           {/* corner ticks — the reticle reads as machined, not as a circle */}
-          <span className="absolute -top-px -left-px h-1.5 w-1.5 border-t border-l border-signal" />
-          <span className="absolute -top-px -right-px h-1.5 w-1.5 border-t border-r border-signal" />
-          <span className="absolute -bottom-px -left-px h-1.5 w-1.5 border-b border-l border-signal" />
-          <span className="absolute -right-px -bottom-px h-1.5 w-1.5 border-r border-b border-signal" />
+          <span className="border-signal absolute -top-px -left-px h-2.5 w-2.5 border-t-2 border-l-2" />
+          <span className="border-signal absolute -top-px -right-px h-2.5 w-2.5 border-t-2 border-r-2" />
+          <span className="border-signal absolute -bottom-px -left-px h-2.5 w-2.5 border-b-2 border-l-2" />
+          <span className="border-signal absolute -right-px -bottom-px h-2.5 w-2.5 border-r-2 border-b-2" />
         </motion.div>
       </motion.div>
 
-      {/* centre dot tracks the raw pointer with no lag at all */}
+      {/* The point, tracking the raw pointer with no lag. It was 3px, which is
+          smaller than the system cursor it replaces — easy to lose on a dark
+          panel. Now a proper lit dot with a halo, so it reads as an LED. */}
       <motion.div
         className="absolute top-0 left-0"
         style={{ x, y }}
-        animate={{ opacity: visible && !locked ? 1 : 0 }}
-        transition={{ duration: 0.12 }}
+        animate={{ opacity: visible ? 1 : 0, scale: locked ? 0.55 : 1 }}
+        transition={{ duration: 0.16 }}
       >
-        <span className="bg-signal absolute h-[3px] w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
+        <span
+          className="bg-signal absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            boxShadow:
+              "0 0 0 3px color-mix(in oklch, var(--color-signal) 22%, transparent), 0 0 14px 2px color-mix(in oklch, var(--color-signal) 55%, transparent)",
+          }}
+        />
       </motion.div>
 
       {/* readout label */}
@@ -139,7 +147,7 @@ export default function Cursor() {
         animate={{ opacity: label && visible ? 1 : 0 }}
         transition={{ duration: 0.18 }}
       >
-        <span className="u-mono bg-signal text-bg absolute translate-x-6 translate-y-4 px-1.5 py-0.5 text-[10px] whitespace-nowrap">
+        <span className="u-mono bg-signal text-bg absolute translate-x-9 translate-y-5 px-2 py-1 text-[10px] whitespace-nowrap">
           {label}
         </span>
       </motion.div>
