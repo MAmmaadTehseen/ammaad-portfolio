@@ -8,7 +8,7 @@ import Systems from "@/components/Systems";
 export const metadata: Metadata = {
   title: "Work",
   description:
-    "Nine builds by Muhammad Ammaad Tehseen — AI platforms, billing lifecycles, real-time systems and internal tooling, in TypeScript, Node.js, Next.js, Prisma and PostgreSQL.",
+    "Client platforms and personal builds by Muhammad Ammaad Tehseen — coliving operations, AI lead conversion, an AI-augmented LMS, workflow automation and a Swiss business marketplace.",
   alternates: { canonical: "/work" },
   openGraph: {
     type: "website",
@@ -34,8 +34,8 @@ export default function WorkIndex() {
           <SplitText text="Work" />
         </h1>
         <p className="text-muted u-prose mt-5 text-lg">
-          Nine builds, disclosed at three depths. What you can see of each one depends on
-          whether the source is mine to show.
+          {projects.length} builds, disclosed at three depths. What you can see of each one
+          depends on whether the source is mine to show.
         </p>
 
         {/* the tier system is the organising idea, so it is stated up front */}

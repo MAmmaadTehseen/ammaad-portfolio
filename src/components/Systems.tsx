@@ -239,8 +239,22 @@ export default function Systems({ heading = true }: { heading?: boolean }) {
   });
 
   return (
-    <section id="work" className="mx-auto max-w-[1400px] scroll-mt-24 px-5 py-24 sm:px-8 sm:py-32">
-      <div className="border-line-soft mb-12 flex flex-wrap items-end justify-between gap-6 border-b pb-6">
+    <section
+      id="work"
+      // Standalone it owns its own gutter and rhythm. Embedded under a page
+      // that already provides both, adding them again double-insets the list
+      // and leaves a dead band under the page header.
+      className={
+        heading
+          ? "mx-auto max-w-[1400px] scroll-mt-24 px-5 py-24 sm:px-8 sm:py-32"
+          : "scroll-mt-24 pt-10 pb-8"
+      }
+    >
+      <div
+        className={`flex flex-wrap items-end justify-between gap-6 ${
+          heading ? "border-line-soft mb-12 border-b pb-6" : "mb-8"
+        }`}
+      >
         <div>
           {heading && (
             <>
@@ -248,10 +262,11 @@ export default function Systems({ heading = true }: { heading?: boolean }) {
                 <SplitText text="Work" />
               </h2>
               <p className="text-muted u-prose mt-3 text-sm">
-                Nine builds, disclosed at three depths. <span className="text-ink">Open</span> means
-                you can read the source, <span className="text-ink">Live</span> means it is running
-                for someone right now, and <span className="text-ink">Closed</span> means the source
-                is private — so you get the architecture instead of a screenshot.
+                {projects.length} builds, disclosed at three depths.{" "}
+                <span className="text-ink">Open</span> means you can read the source,{" "}
+                <span className="text-ink">Live</span> means it is running for someone right now,
+                and <span className="text-ink">Closed</span> means the source is private — so you
+                get the architecture instead of a screenshot.
               </p>
             </>
           )}

@@ -7,7 +7,16 @@ import Cursor from "@/components/Cursor";
 import Nav from "@/components/Nav";
 import SmoothScroll from "@/components/SmoothScroll";
 import SiteFooter from "@/components/SiteFooter";
-import { bio, capabilities, meta, profile, projects, stackGroups } from "@/content/site";
+import {
+  bio,
+  capabilities,
+  education,
+  experience,
+  meta,
+  profile,
+  projects,
+  stackGroups,
+} from "@/content/site";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -111,6 +120,15 @@ const SITE_SCHEMA = {
         addressRegion: "Punjab",
         addressCountry: "PK",
       },
+      // current employer and school: the two entity links Google most often
+      // uses to connect a person to organisations it already knows
+      worksFor: { "@type": "Organization", name: experience[0].org },
+      alumniOf: { "@type": "EducationalOrganization", name: education.org },
+      hasOccupation: experience.map((role) => ({
+        "@type": "Occupation",
+        name: role.role,
+        occupationLocation: { "@type": "City", name: "Lahore" },
+      })),
       sameAs: profile.socials.map((social) => social.href),
     },
     {

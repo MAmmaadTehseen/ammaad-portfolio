@@ -83,7 +83,7 @@ export default function Reel() {
           <div>
             <span className="u-engrave">Selected work</span>
             <h2 className="u-display text-ink mt-3 text-[clamp(1.8rem,5vw,3.2rem)]">
-              Nine builds, sideways
+              {projects.length} builds, sideways
             </h2>
           </div>
           <p className="u-mono text-dim text-[11px] tracking-[0.14em] uppercase">

@@ -26,8 +26,8 @@ export const profile = {
   short: "Ammaad",
   /** Rendered letter by letter in the hero. Keep it short. */
   display: "AMMAAD",
-  role: "Full-stack engineer",
-  discipline: "Backend systems · product engineering",
+  role: "Full-stack developer",
+  discipline: "AI & automation engineering · backend systems",
   location: "Lahore, Pakistan",
   timezone: "Asia/Karachi",
   /** Shown as a live LED in the hero + contact. */
@@ -45,14 +45,45 @@ export const profile = {
   socials: [
     { label: "GitHub", href: "https://github.com/MAmmaadTehseen", handle: "MAmmaadTehseen" },
     { label: "X", href: "https://x.com/MAmmaadTehseen", handle: "@MAmmaadTehseen" },
-    /* ------------------------------------------------------------------
-       LINKEDIN — uncomment this line and paste your profile URL. It then
-       appears in the nav footer, the contact page and the JSON-LD `sameAs`
-       automatically. Left out rather than guessed, because a wrong profile
-       link is worse than no link.
-       ------------------------------------------------------------------ */
-    // { label: "LinkedIn", href: "https://www.linkedin.com/in/YOUR-HANDLE", handle: "in/YOUR-HANDLE" },
+    {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/muhammadammaadtehseen",
+      handle: "in/muhammadammaadtehseen",
+    },
   ],
+};
+
+/** Employment. Kept factual — this is the section a recruiter scans first. */
+export const experience = [
+  {
+    role: "Full-Stack Developer (MERN / Next.js)",
+    org: "Hashlogics",
+    location: "Lahore, Pakistan",
+    period: "Nov 2024 — present",
+    points: [
+      "Deliver multiple concurrent client projects end to end, owning architecture, development and client communication from planning through deployment.",
+      "Architect and ship scalable multi-tenant applications on MERN and Next.js, integrating 20+ third-party services.",
+      "Build AI automation and RAG systems with OpenAI, LangChain and n8n to cut manual work out of client operations.",
+      "Integrate complex external platforms — Google (Calendar, Sheets, Docs, Ads), Meta, GoHighLevel, Next Health, Skribble, Abacus, Gravity Forms and Typeform.",
+    ],
+  },
+  {
+    role: "React JS Developer",
+    org: "TECXRA",
+    location: "Lahore, Pakistan",
+    period: "Mar 2024 — Sep 2024",
+    points: [
+      "Developed and maintained full-stack applications on MERN and Next.js.",
+      "Built a real-time e-commerce platform with WebSocket-driven live product updates and JWT/OAuth authentication.",
+      "Resolved cross-stack defects to improve stability and performance.",
+    ],
+  },
+];
+
+export const education = {
+  degree: "BSc Information Technology (BSIT)",
+  org: "GCS — affiliated with the University of Punjab",
+  period: "2020 — 2024",
 };
 
 /** The About page. Longer form than the home page's three-channel bio. */
@@ -77,8 +108,8 @@ export const about = {
     },
   ],
   now: [
-    "Building and maintaining an AI learning and community platform end to end — billing, retrieval, real-time, analytics and admin tooling.",
-    "Designing a cross-department early warning system that watches everyday work tools and routes real problems to the right manager.",
+    "Full-stack developer at Hashlogics, delivering client platforms end to end across coliving, healthcare and education.",
+    "Building AI-augmented products: RAG assistants, automated email engines, and n8n pipelines that turn meetings into assigned work.",
     "Open to contract and full-time work, remote, across any timezone.",
   ],
 };
@@ -107,9 +138,9 @@ export const bio: Record<Channel, { lede: string; body: string }> = {
       "Subscriptions that bill correctly. Email that reaches people. Dashboards that tell you the truth. I take a product from an idea to something live, then keep it alive — the unglamorous half most builds skip. You get one person accountable for the whole stack instead of a handoff between three.",
   },
   recruiter: {
-    lede: "Full-stack engineer. Heaviest on the backend, comfortable owning the front.",
+    lede: "Full-stack developer, two years shipping production platforms on MERN and Next.js.",
     body:
-      "Day to day I work across a TypeScript monorepo — Next.js and React on the front, Node, Express and Prisma over PostgreSQL on the back, with Redis, ChromaDB, Bull queues and Socket.IO where the work needs them. Most of what I ship is systems work: billing lifecycles, retrieval pipelines, real-time presence, scheduled jobs, and migrations against live data.",
+      "Currently at Hashlogics, delivering client platforms end to end — architecture, build and client communication. Next.js and React on the front; Node, Express and Prisma over PostgreSQL, plus Supabase, on the back. The specialism is AI-powered products and workflow automation: RAG assistants, OpenAI pipelines and multi-tenant SaaS, with integration work across Stripe, Mailgun and twenty-odd third-party services.",
   },
   engineer: {
     lede: "I like the parts that page you at 3am.",
@@ -162,46 +193,183 @@ export type Project = {
 };
 
 /* ------------------------------------------------------------------
-   NOTE FOR AMMAAD — client naming
-   Project 01 is your biggest piece of work but it is client software,
-   so I described it by capability and left the client unnamed. That is
-   the safe default. If you have the go-ahead to name them, set
-   name: "First Movers AI Labs" and add the live URL to links.
-   Same call for the storefront (al-junassan / closet-by-junassan).
+   Named client work comes from the CV, which already publishes these
+   names and live URLs. Project years are inferred from the employment
+   dates rather than stated per project on the CV — correct any that
+   are wrong.
    ------------------------------------------------------------------ */
 
 export const projects: Project[] = [
   {
-    id: "ai-labs",
-    name: "AI Learning & Community Platform",
-    tier: "closed",
-    year: "2024 — now",
-    role: "Full-stack engineer · primary product",
+    id: "tomodomo",
+    name: "TomoDomo — Coliving Operations Platform",
+    tier: "live",
+    year: "2025",
+    role: "Tech lead · Hashlogics",
     lede: {
       client:
-        "A subscription platform where members take AI courses, ask an assistant trained on the whole course library, and talk to each other in one place.",
+        "The operating system for a Swiss coliving operator running eight communities — intake, booking, contracts, residency and checkout unified in one platform.",
       recruiter:
-        "The product I work on daily. I own features end to end across billing, real-time, analytics, email and admin tooling in a TypeScript monorepo.",
+        "Led architecture and delivery. React + TypeScript SPA on Supabase Edge Functions over Postgres with row-level security, plus Stripe, Skribble e-signature and Abacus CRM over OData.",
+      engineer:
+        "The resident lifecycle is a forward-only state machine with server-validated transitions, advanced by a daily multi-pass cron for time-based events, with a dedicated webhook endpoint per integration.",
+    },
+    stack: [
+      "React",
+      "TypeScript",
+      "Supabase",
+      "PostgreSQL",
+      "Row-Level Security",
+      "Stripe",
+      "Skribble",
+      "Abacus (OData)",
+      "Redux",
+      "React Query",
+      "SendGrid",
+      "Jira",
+    ],
+    links: [{ label: "Live", href: "https://hub.tomodomo.ch" }],
+    outcomes: [
+      "Eight communities running on one system instead of scattered tools",
+      "Booking fees taken by Stripe, contracts signed through Skribble",
+      "Recurring invoicing and CRM kept in step with Abacus over OData",
+      "Intake automated across Wix, VideoAsk, Calendly, Jira, SendGrid and Google Sheets",
+    ],
+    internals: [
+      "Resident lifecycle modelled as a forward-only state machine — transitions are validated server-side, so no client can skip a step",
+      "A daily multi-pass cron advances time-based events: move-in and move-out, room changes, contract extensions",
+      "One webhook endpoint per integration rather than a shared handler, so a failing partner never takes the others down",
+      "Passwordless magic-link auth with a role hierarchy enforced by row-level security, not by the UI",
+      "Per-community configuration flags decide which integrations are live for whom",
+    ],
+    flow: {
+      nodes: [
+        { id: "intake", label: "Intake", sub: "Wix · VideoAsk", col: 1, row: 1, kind: "edge" },
+        { id: "spa", label: "React SPA", sub: "TypeScript", col: 1, row: 2, kind: "edge" },
+        { id: "edge", label: "Edge Functions", sub: "Supabase", col: 2, row: 2, kind: "service" },
+        { id: "cron", label: "Daily cron", sub: "multi-pass", col: 3, row: 3, kind: "worker" },
+        { id: "pg", label: "Postgres", sub: "row-level security", col: 4, row: 2, kind: "store" },
+        { id: "store", label: "Storage", sub: "contracts", col: 4, row: 1, kind: "store" },
+        {
+          id: "partners",
+          label: "Stripe · Skribble",
+          sub: "Abacus (OData)",
+          col: 3,
+          row: 1,
+          kind: "edge",
+        },
+      ],
+      edges: [
+        { from: "intake", to: "edge", label: "webhook" },
+        { from: "spa", to: "edge", label: "rpc" },
+        { from: "edge", to: "pg" },
+        { from: "edge", to: "store", label: "files" },
+        { from: "edge", to: "cron", label: "schedule" },
+        { from: "cron", to: "pg", dashed: true },
+        { from: "partners", to: "edge", label: "events" },
+      ],
+    },
+  },
+  {
+    id: "algoricum",
+    name: "Algoricum — AI Lead Conversion for Clinics",
+    tier: "live",
+    year: "2025",
+    role: "Full-stack developer · Hashlogics",
+    lede: {
+      client:
+        "Captures, nurtures and converts patient leads with no manual follow-up, and answers patient questions around the clock. HIPAA-compliant, with a BAA and data-use consent.",
+      recruiter:
+        "Node.js platform pulling 10+ lead sources from CRMs, ad platforms and form tools over OAuth and REST, with a two-way email engine built on Mailgun and OpenAI.",
+      engineer:
+        "Per-clinic addresses on wildcard subdomains with SPF, DKIM and DMARC; inbound-parse webhooks; OpenAI-drafted replies routed back to the clinic that owns the thread.",
+    },
+    stack: [
+      "Node.js",
+      "OpenAI",
+      "Mailgun",
+      "OAuth",
+      "REST",
+      "HubSpot",
+      "Pipedrive",
+      "Meta Lead Ads",
+      "Google Lead Ads",
+      "Stripe",
+    ],
+    links: [{ label: "Live", href: "https://algoricum.hashlogics.com" }],
+    outcomes: [
+      "Leads answered without anyone at the clinic touching an inbox",
+      "Nurture sequences up to 35 SMS and email steps",
+      "An embedded assistant that answers questions and books consultations 24/7",
+      "Self-serve onboarding: booking-link validation, branded booking pages, CSV import",
+    ],
+    internals: [
+      "Wildcard subdomains give every clinic its own address, with SPF/DKIM/DMARC set per domain",
+      "Inbound-parse webhooks feed replies to OpenAI and route the answer back to the right clinic",
+      "Subdomain warm-up, because a cold domain sending 35-step sequences lands in spam",
+      "10+ sources normalised behind one lead shape — HubSpot, Pipedrive, Meta, Google, Jotform, Typeform",
+    ],
+    flow: {
+      nodes: [
+        {
+          id: "ads",
+          label: "Lead sources",
+          sub: "Meta · Google · forms",
+          col: 1,
+          row: 1,
+          kind: "edge",
+        },
+        { id: "crm", label: "CRMs", sub: "HubSpot · Pipedrive", col: 1, row: 3, kind: "edge" },
+        { id: "api", label: "Node API", sub: "normalise", col: 2, row: 2, kind: "service" },
+        { id: "ai", label: "OpenAI", sub: "drafts replies", col: 3, row: 1, kind: "worker" },
+        { id: "mail", label: "Mailgun", sub: "inbound parse", col: 3, row: 3, kind: "service" },
+        { id: "db", label: "Leads", sub: "state + consent", col: 4, row: 2, kind: "store" },
+        { id: "patient", label: "Patient", sub: "email · SMS", col: 5, row: 3, kind: "edge" },
+      ],
+      edges: [
+        { from: "ads", to: "api", label: "oauth" },
+        { from: "crm", to: "api", label: "rest" },
+        { from: "api", to: "db" },
+        { from: "api", to: "ai", label: "context" },
+        { from: "ai", to: "mail", label: "reply" },
+        { from: "mail", to: "patient", label: "send" },
+        { from: "patient", to: "mail", label: "inbound" },
+      ],
+    },
+  },
+  {
+    id: "ai-labs",
+    name: "R&D AI Labs — AI-Augmented LMS",
+    tier: "live",
+    year: "2024 — now",
+    role: "Full-stack developer",
+    lede: {
+      client:
+        "A learning platform where members take AI courses, ask an assistant trained on the whole course library, earn certificates, and talk to each other in one community.",
+      recruiter:
+        "Next.js 14 front end and a Node/Express API over Prisma and Postgres. RAG assistant, Stripe subscriptions, real-time community, certificates, and the admin analytics behind them.",
       engineer:
         "Express API with a repository/service split over Prisma and Postgres. Redis carries presence and caching, ChromaDB carries retrieval, Bull carries anything scheduled, Socket.IO carries the live surface.",
     },
     stack: [
+      "Next.js 14",
       "TypeScript",
-      "Next.js",
-      "React",
-      "Redux",
       "Node.js",
       "Express",
       "Prisma",
       "PostgreSQL",
-      "Redis",
+      "OpenAI",
+      "LangChain",
       "ChromaDB",
+      "Redis + Bull",
       "Socket.IO",
-      "Bull",
       "Stripe",
-      "AWS S3",
+      "AWS S3/CloudFront",
       "Docker",
+      "Sentry",
+      "Cypress",
     ],
+    links: [{ label: "Live", href: "https://labs.firstmovers.ai" }],
     outcomes: [
       "Courses, cohorts and certificates delivered to paying members",
       "Subscription billing, invoices and failed-payment recovery",
@@ -217,7 +385,7 @@ export const projects: Project[] = [
     ],
     flow: {
       nodes: [
-        { id: "web", label: "Next.js", sub: "app router", col: 1, row: 2, kind: "edge" },
+        { id: "web", label: "Next.js 14", sub: "app router", col: 1, row: 2, kind: "edge" },
         { id: "api", label: "Express API", sub: "service / repo", col: 2, row: 2, kind: "service" },
         { id: "sock", label: "Socket.IO", sub: "live rooms", col: 2, row: 1, kind: "service" },
         { id: "queue", label: "Bull", sub: "scheduled jobs", col: 3, row: 3, kind: "worker" },
@@ -238,6 +406,73 @@ export const projects: Project[] = [
         { from: "stripe", to: "api", label: "events" },
       ],
     },
+  },
+  {
+    id: "meeting-automation",
+    name: "Meeting-to-Task Automation",
+    tier: "closed",
+    year: "2025",
+    role: "Automation engineer · Hashlogics",
+    lede: {
+      client:
+        "Recorded meetings become classified, assigned tasks on their own, and the CEO dashboard stays in sync — no note-taking, no task entry.",
+      recruiter:
+        "Five interconnected n8n workflows chaining transcription to OpenAI classification, then to ClickUp and Notion, with a daily summary cron and Slack error routing.",
+      engineer:
+        "Structured JSON output classifies every action item by Eisenhower priority, department, assignee, due date and CEO relevance. The Notion and ClickUp sync is bidirectional on a 60-second loop with loop-prevention guards.",
+    },
+    stack: ["n8n", "OpenAI", "Lindy AI", "ClickUp API", "Notion API", "Slack", "Webhooks", "Cron"],
+    outcomes: [
+      "No manual note-taking or task entry after a meeting",
+      "Every action item lands with a priority, an owner and a due date",
+      "A CEO dashboard that is current rather than reconstructed weekly",
+    ],
+    internals: [
+      "Bidirectional Notion and ClickUp sync every 60 seconds, with guards so an echo does not become an infinite loop",
+      "Classification returns structured JSON rather than prose, so downstream steps parse instead of guess",
+      "Tasks fan out to department lists, a CEO master list and the project list, back-linked to the Notion meeting page",
+      "A global error handler routes any workflow failure to Slack — silent automation failure is worse than no automation",
+    ],
+    flow: {
+      nodes: [
+        { id: "meeting", label: "Meeting", sub: "recorded", col: 1, row: 2, kind: "edge" },
+        { id: "lindy", label: "Lindy AI", sub: "transcription", col: 2, row: 2, kind: "service" },
+        { id: "ai", label: "OpenAI", sub: "classify to JSON", col: 3, row: 2, kind: "worker" },
+        { id: "clickup", label: "ClickUp", sub: "tasks", col: 4, row: 1, kind: "store" },
+        { id: "notion", label: "Notion", sub: "meeting pages", col: 4, row: 3, kind: "store" },
+        { id: "slack", label: "Slack", sub: "errors · alerts", col: 5, row: 2, kind: "edge" },
+      ],
+      edges: [
+        { from: "meeting", to: "lindy" },
+        { from: "lindy", to: "ai", label: "transcript" },
+        { from: "ai", to: "clickup", label: "tasks" },
+        { from: "ai", to: "notion", label: "pages" },
+        { from: "clickup", to: "notion", label: "60s sync", dashed: true },
+        { from: "ai", to: "slack", label: "digest" },
+      ],
+    },
+  },
+  {
+    id: "lumaya",
+    name: "Lumaya — Swiss Business Marketplace",
+    tier: "live",
+    year: "2025",
+    role: "Full-stack developer · Hashlogics",
+    lede: {
+      client:
+        "A two-sided marketplace for buying and selling Swiss SMEs — vetted listings, anonymised public previews, and confidential detail released only to verified buyers under NDA.",
+      recruiter:
+        "Next.js and TypeScript on Vercel. Searchable listings, separate buyer and seller journeys, multi-stage buyer vetting, multi-language support and scheduling.",
+      engineer:
+        "The interesting constraint is disclosure: a listing has a public face and a confidential one, and the gate between them is NDA status rather than a UI toggle.",
+    },
+    stack: ["Next.js", "TypeScript", "Vercel", "i18n", "Google Tag Manager", "Lemcal"],
+    links: [{ label: "Live", href: "https://lumaya.ch" }],
+    outcomes: [
+      "Sellers list without exposing their business publicly",
+      "Buyers are vetted in stages before confidential detail unlocks",
+      "Multi-language, with scheduling and analytics wired in",
+    ],
   },
   {
     id: "ai-manager",
@@ -264,7 +499,14 @@ export const projects: Project[] = [
     ],
     flow: {
       nodes: [
-        { id: "tools", label: "Work tools", sub: "chat · tickets · CRM", col: 1, row: 2, kind: "edge" },
+        {
+          id: "tools",
+          label: "Work tools",
+          sub: "chat · tickets · CRM",
+          col: 1,
+          row: 2,
+          kind: "edge",
+        },
         { id: "ingest", label: "Connectors", sub: "normalise", col: 2, row: 2, kind: "service" },
         { id: "class", label: "Classifier", sub: "risk + confidence", col: 3, row: 2, kind: "worker" },
         { id: "rules", label: "Routing", sub: "escalate · digest", col: 4, row: 2, kind: "service" },
@@ -328,14 +570,15 @@ export const projects: Project[] = [
   {
     id: "junassan",
     name: "Fashion Storefront",
-    tier: "live",
+    tier: "open",
     year: "2026",
-    role: "Full-stack engineer",
+    role: "Full-stack developer",
     lede: {
       client:
         "A clothing label's storefront — catalogue, collections and checkout, built to be run by the people who own it.",
       recruiter: "Client e-commerce build in TypeScript and Next.js, storefront through to admin.",
-      engineer: "Catalogue and cart resolved on the server, so a price is never something the browser gets to decide.",
+      engineer:
+        "Catalogue and cart resolved on the server, so a price is never something the browser gets to decide.",
     },
     stack: ["TypeScript", "Next.js", "React", "Tailwind"],
     links: [{ label: "Source", href: "https://github.com/MAmmaadTehseen/closet-by-junassan" }],
@@ -349,24 +592,11 @@ export const projects: Project[] = [
     lede: {
       client: "A quiet place to write things down and find them again.",
       recruiter: "Minimal note-taking app for personal sensemaking. TypeScript.",
-      engineer: "An editor is only as good as its data model — flat notes with links beat folders every time.",
+      engineer:
+        "An editor is only as good as its data model — flat notes with links beat folders every time.",
     },
     stack: ["TypeScript", "Next.js", "React"],
     links: [{ label: "Source", href: "https://github.com/MAmmaadTehseen/em" }],
-  },
-  {
-    id: "staff-booking",
-    name: "Staff Booking Platform",
-    tier: "closed",
-    year: "2026",
-    role: "Full-stack engineer",
-    lede: {
-      client: "Book staff onto shifts without the WhatsApp thread.",
-      recruiter: "Next.js 15 + TypeScript + Tailwind + Supabase booking system, built as a reusable base.",
-      engineer:
-        "Availability windows and bookings kept as separate tables — an overlap is then a query, not a flag you have to keep in sync.",
-    },
-    stack: ["TypeScript", "Next.js 15", "Tailwind", "Supabase", "PostgreSQL"],
   },
   {
     id: "samosa",
@@ -375,7 +605,8 @@ export const projects: Project[] = [
     year: "2026",
     role: "For the office",
     lede: {
-      client: "A bot that tells the office when it is about to rain, so someone can propose samosas in time.",
+      client:
+        "A bot that tells the office when it is about to rain, so someone can propose samosas in time.",
       recruiter: "Small scheduled service. Cross-checks several weather sources and posts to Slack.",
       engineer:
         "Hourly multi-source rain check for a one-to-six pm window over Johar Town, Lahore. One source is a guess; three sources agreeing is a forecast.",
@@ -394,12 +625,35 @@ export const stackGroups: { label: string; note: string; items: string[] }[] = [
   {
     label: "Regular",
     note: "Reached for when the work calls for them",
-    items: ["Redis", "Socket.IO", "Bull", "Stripe", "Redux", "ChromaDB", "Docker", "AWS S3", "Zod"],
+    items: [
+      "Supabase",
+      "OpenAI",
+      "LangChain",
+      "ChromaDB",
+      "Redis + Bull",
+      "Socket.IO",
+      "Stripe",
+      "Docker",
+      "AWS S3 / CloudFront",
+      "Redux Toolkit",
+      "React Query",
+      "Zod",
+    ],
   },
   {
     label: "Working knowledge",
     note: "Shipped with them, would not call myself a specialist",
-    items: ["Supabase", "GitHub Actions", "Vercel", "Python", "Figma"],
+    items: [
+      "n8n",
+      "MongoDB",
+      "Mailgun",
+      "Zustand",
+      "shadcn/ui",
+      "Cypress",
+      "Sentry",
+      "Vercel",
+      "GitHub Actions",
+    ],
   },
 ];
 
@@ -408,5 +662,5 @@ export const meta = {
    *  highest-intent search for a portfolio is the person's own name. */
   title: "Ammaad Tehseen — Full-stack Engineer, Lahore",
   description:
-    "Muhammad Ammaad Tehseen is a full-stack engineer in Lahore, Pakistan working in TypeScript, Node.js, Next.js, Prisma and PostgreSQL. Billing lifecycles, RAG pipelines, real-time systems, and the admin tooling that keeps them honest.",
+    "Muhammad Ammaad Tehseen — full-stack developer and AI automation engineer in Lahore, Pakistan. Two years shipping production platforms on MERN and Next.js: RAG assistants, multi-tenant SaaS, billing lifecycles and workflow automation.",
 };

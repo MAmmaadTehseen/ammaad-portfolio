@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { about, profile, stackGroups } from "@/content/site";
+import { about, education, experience, profile, stackGroups } from "@/content/site";
 import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 
@@ -47,6 +47,43 @@ export default function AboutPage() {
               </div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* the section a recruiter scans first, so it is plain and factual */}
+      <section className="mt-16">
+        <h2 className="u-display text-ink text-[clamp(1.4rem,3.4vw,2rem)]">Experience</h2>
+        <ol className="border-line-soft mt-8 border-t">
+          {experience.map((role) => (
+            <li key={`${role.org}-${role.period}`} className="border-line-soft border-b py-8">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                <h3 className="u-display text-ink text-xl">{role.role}</h3>
+                <span className="u-mono text-signal text-[11px] tracking-[0.1em]">
+                  {role.period}
+                </span>
+              </div>
+              <p className="u-mono text-dim mt-1.5 text-[11px] tracking-[0.1em] uppercase">
+                {role.org} — {role.location}
+              </p>
+              <ul className="mt-5 space-y-2.5">
+                {role.points.map((point) => (
+                  <li key={point} className="flex gap-3">
+                    <span className="bg-primary/70 mt-2.5 h-1 w-1 shrink-0 rotate-45" aria-hidden />
+                    <span className="text-muted text-[15px] leading-relaxed">{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+
+        <div className="mt-8 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+          <div>
+            <span className="u-engrave">Education</span>
+            <p className="text-ink mt-2">{education.degree}</p>
+            <p className="text-dim text-sm">{education.org}</p>
+          </div>
+          <span className="u-mono text-dim text-[11px] tracking-[0.1em]">{education.period}</span>
         </div>
       </section>
 
