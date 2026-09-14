@@ -84,10 +84,14 @@ const BOOT_GATE = `try{(sessionStorage.getItem('readout:boot')==='1'||matchMedia
 /**
  * One linked graph rather than a lone Person.
  *
- * The nine projects are the substance of this site, and none of them were
+ * The projects are the substance of this site, and none of them were
  * described to a machine at all. Structured data is the right channel for that
  * inventory: it carries every project's name, summary and stack without adding
  * a node to the DOM or a frame to the render.
+ *
+ * Only nodes that are true of every page belong here. ProfilePage is not: it
+ * lives on the home page, because from the layout it declared every project
+ * page a profile page as well.
  */
 const SITE_SCHEMA = {
   "@context": "https://schema.org",
@@ -130,15 +134,6 @@ const SITE_SCHEMA = {
         occupationLocation: { "@type": "City", name: "Lahore" },
       })),
       sameAs: profile.socials.map((social) => social.href),
-    },
-    {
-      "@type": "ProfilePage",
-      "@id": `${profile.site}/#profile`,
-      url: profile.site,
-      name: meta.title,
-      isPartOf: { "@id": `${profile.site}/#website` },
-      about: { "@id": `${profile.site}/#person` },
-      inLanguage: "en",
     },
     {
       "@type": "ItemList",

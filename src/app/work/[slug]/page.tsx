@@ -79,7 +79,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: profile.site },
-          { "@type": "ListItem", position: 2, name: "Work", item: `${profile.site}/#work` },
+          { "@type": "ListItem", position: 2, name: "Work", item: `${profile.site}/work` },
           { "@type": "ListItem", position: 3, name: project.name, item: url },
         ],
       },
@@ -102,7 +102,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           </li>
           <li aria-hidden>/</li>
           <li>
-            <Link href="/#work" className="hover:text-signal transition-colors" data-cursor="All work">
+            <Link href="/work" className="hover:text-signal transition-colors" data-cursor="All work">
               Work
             </Link>
           </li>
@@ -283,7 +283,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
       <div className="mt-10">
         <Link
-          href="/#work"
+          href="/work"
           data-cursor="All work"
           className="u-mono text-dim hover:text-signal text-[11px] tracking-[0.14em] uppercase transition-colors"
         >
