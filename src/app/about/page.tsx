@@ -21,14 +21,14 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-[900px] px-5 pt-32 pb-24 sm:px-8 sm:pt-40">
-      <header className="grid gap-10 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-end">
+      <header className="grid gap-12 sm:grid-cols-[minmax(0,1fr)_250px] sm:items-end">
         <div className="min-w-0">
           <span className="u-engrave">{profile.location} · UTC+05:00</span>
           <h1 className="u-display text-ink mt-4 text-[clamp(2rem,6vw,3.6rem)]">
             <SplitText text={about.lede} />
           </h1>
         </div>
-        <Portrait sizes="220px" priority className="max-w-[220px]" />
+        <Portrait sizes="250px" priority className="w-[min(250px,100%)]" />
       </header>
 
       <div className="border-line-soft mt-10 border-t pt-10">
