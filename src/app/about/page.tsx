@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { about, education, experience, profile, stackGroups } from "@/content/site";
+import Portrait from "@/components/Portrait";
 import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 
@@ -20,11 +21,14 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-[900px] px-5 pt-32 pb-24 sm:px-8 sm:pt-40">
-      <header>
-        <span className="u-engrave">{profile.location} · UTC+05:00</span>
-        <h1 className="u-display text-ink mt-4 text-[clamp(2rem,6vw,3.6rem)]">
-          <SplitText text={about.lede} />
-        </h1>
+      <header className="grid gap-10 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-end">
+        <div className="min-w-0">
+          <span className="u-engrave">{profile.location} · UTC+05:00</span>
+          <h1 className="u-display text-ink mt-4 text-[clamp(2rem,6vw,3.6rem)]">
+            <SplitText text={about.lede} />
+          </h1>
+        </div>
+        <Portrait sizes="220px" priority className="max-w-[220px]" />
       </header>
 
       <div className="border-line-soft mt-10 border-t pt-10">

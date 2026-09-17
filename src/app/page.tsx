@@ -24,6 +24,7 @@ const PROFILE_SCHEMA = {
     "@id": `${profile.site}/#person`,
     name: profile.name,
     url: profile.site,
+    image: `${profile.site}${profile.photo.src}`,
     sameAs: profile.socials.map((social) => social.href),
   },
 };

@@ -5,6 +5,7 @@ import { CHANNELS, bio } from "@/content/site";
 import { useChannel } from "@/lib/channel";
 import { EASE } from "@/lib/motion";
 import ChannelSwitch from "./ChannelSwitch";
+import Portrait from "./Portrait";
 import ScrambleText from "./ScrambleText";
 import Reveal from "./Reveal";
 
@@ -17,6 +18,7 @@ export default function Intro() {
       <div className="grid gap-10 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)] lg:gap-16">
         <Reveal>
           <div className="lg:sticky lg:top-28">
+            <Portrait sizes="240px" className="mb-10 max-w-[240px]" />
             <span className="u-engrave">Reading as</span>
             <div className="mt-4">
               <ChannelSwitch />

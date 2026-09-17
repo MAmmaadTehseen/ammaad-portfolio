@@ -111,6 +111,7 @@ const SITE_SCHEMA = {
       name: profile.name,
       alternateName: [profile.short, "Ammad Tehseen"],
       url: profile.site,
+      image: `${profile.site}${profile.photo.src}`,
       jobTitle: profile.role,
       description: bio.recruiter.body,
       email: `mailto:${profile.email}`,

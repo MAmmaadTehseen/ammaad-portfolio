@@ -34,6 +34,13 @@ export const profile = {
   available: true,
   availableNote: "Open to contract and full-time work",
   email: "ammadtehseenkhan@gmail.com",
+  /** 4:5 portrait served from /public. Also the Person image in structured data. */
+  photo: {
+    src: "/ammaad-tehseen.jpg",
+    width: 960,
+    height: 1200,
+    alt: "Muhammad Ammaad Tehseen",
+  },
   /**
    * Must be the host that actually serves the site, not the one that redirects
    * to it. Vercel is set up apex -> www, and canonical, OG image, sitemap and
