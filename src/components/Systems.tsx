@@ -8,7 +8,7 @@ import {
   useMotionValueEvent,
   useScroll,
 } from "motion/react";
-import { projects, TIERS } from "@/content/site";
+import { TIERS } from "@/content/site";
 import type { Channel, Project, Tier } from "@/content/site";
 import { useChannel } from "@/lib/channel";
 import { EASE, useScrollSkew } from "@/lib/motion";
@@ -168,7 +168,18 @@ function Detail({ project, channel }: { project: Project; channel: Channel }) {
   );
 }
 
-export default function Systems({ heading = true }: { heading?: boolean }) {
+/**
+ * The in-depth work arrives as a prop from the server page rather than being
+ * imported here, so the full write-ups ride in that page's payload instead of
+ * the JavaScript every page downloads.
+ */
+export default function Systems({
+  projects,
+  heading = true,
+}: {
+  projects: Project[];
+  heading?: boolean;
+}) {
   const { channel } = useChannel();
   const [activeIndex, setActiveIndex] = useState(0);
   const active = projects[activeIndex] ?? projects[0];
@@ -364,7 +375,7 @@ export default function Systems({ heading = true }: { heading?: boolean }) {
 
                 {/* the panel is a button, so the link to the project's own page
                     sits beside it rather than inside it — nesting an anchor in
-                    a button is invalid, and these nine links are how a crawler
+                    a button is invalid, and these links are how a crawler
                     reaches every project */}
                 <Link
                   href={`/work/${project.id}`}

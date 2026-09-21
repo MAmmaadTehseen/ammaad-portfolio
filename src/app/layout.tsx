@@ -15,6 +15,7 @@ import {
   meta,
   profile,
   projects,
+  services,
   stackGroups,
 } from "@/content/site";
 
@@ -135,6 +136,11 @@ const SITE_SCHEMA = {
         occupationLocation: { "@type": "City", name: "Lahore" },
       })),
       sameAs: profile.socials.map((social) => social.href),
+      // the freelance offer, stated to machines the same way it is to people
+      makesOffer: services.map((service) => ({
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name: service.title, description: service.body },
+      })),
     },
     {
       "@type": "ItemList",

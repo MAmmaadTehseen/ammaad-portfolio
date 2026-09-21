@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { profile } from "@/content/site";
+import BookCallLink from "./BookCallLink";
+import WhatsAppLink from "./WhatsAppLink";
 
 const SECTIONS = [
   { label: "Work", href: "/work" },
@@ -33,6 +35,10 @@ export default function SiteFooter() {
           >
             {profile.email}
           </a>
+          <div className="mt-2 flex flex-col items-start gap-1.5">
+            <BookCallLink className="text-muted hover:text-signal" />
+            <WhatsAppLink className="text-muted hover:text-signal" />
+          </div>
         </div>
 
         <nav aria-label="Footer" className="flex gap-10">

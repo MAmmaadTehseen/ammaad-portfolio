@@ -3,8 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
-import { TIERS, projects } from "@/content/site";
+import { TIERS } from "@/content/site";
 import type { Tier } from "@/content/site";
+
+/**
+ * Only what a card shows. The page passes these in rather than this client
+ * component importing the project list, which would ship every project's full
+ * write-up in the JavaScript of every page.
+ */
+export type ReelItem = { id: string; name: string; tier: Tier; lede: string; stack: string[] };
 
 const TIER_DOT: Record<Tier, string> = {
   live: "bg-primary",
@@ -13,7 +20,7 @@ const TIER_DOT: Record<Tier, string> = {
 };
 
 /**
- * Nine builds, taken sideways: the section pins and vertical scroll drives the
+ * The builds, taken sideways: the section pins and vertical scroll drives the
  * track horizontally.
  *
  * The travel distance is measured rather than guessed at a percentage — a
@@ -24,7 +31,7 @@ const TIER_DOT: Record<Tier, string> = {
  * scroll gesture, which on a phone is the only gesture there is; taking it over
  * to move something sideways is worse than letting the thumb do it directly.
  */
-export default function Reel() {
+export default function Reel({ items: projects, total }: { items: ReelItem[]; total: number }) {
   const section = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const [distance, setDistance] = useState(0);
@@ -85,6 +92,13 @@ export default function Reel() {
             <h2 className="u-display text-ink mt-3 text-[clamp(1.8rem,5vw,3.2rem)]">
               {projects.length} builds, sideways
             </h2>
+            <Link
+              href="/work"
+              data-cursor="All work"
+              className="u-mono text-dim hover:text-signal mt-3 inline-block text-[11px] tracking-[0.14em] uppercase transition-colors"
+            >
+              All {total} projects →
+            </Link>
           </div>
           <p className="u-mono text-dim text-[11px] tracking-[0.14em] uppercase">
             {pinned ? "Scroll →" : "Swipe →"}
@@ -125,13 +139,13 @@ export default function Reel() {
                     {project.name}
                   </h3>
                   <p className="text-dim mt-3 text-sm leading-relaxed">
-                    {project.lede.recruiter}
+                    {project.lede}
                   </p>
                 </div>
 
                 <div className="mt-8">
                   <ul className="flex flex-wrap gap-1.5">
-                    {project.stack.slice(0, 5).map((tech) => (
+                    {project.stack.map((tech) => (
                       <li
                         key={tech}
                         className="u-mono border-line-soft text-dim border px-2 py-0.5 text-[10px]"

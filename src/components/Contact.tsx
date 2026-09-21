@@ -2,6 +2,8 @@ import { profile } from "@/content/site";
 import Reveal from "./Reveal";
 import SplitText from "./SplitText";
 import EmailLink from "./EmailLink";
+import BookCallLink from "./BookCallLink";
+import WhatsAppLink from "./WhatsAppLink";
 
 export default function Contact() {
 
@@ -28,6 +30,10 @@ export default function Contact() {
 
         <Reveal delay={0.1}>
           <EmailLink />
+          <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
+            <BookCallLink className="text-muted hover:text-signal" />
+            <WhatsAppLink className="text-muted hover:text-signal" />
+          </div>
         </Reveal>
 
       </div>

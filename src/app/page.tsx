@@ -3,8 +3,9 @@ import Intro from "@/components/Intro";
 import Marquee from "@/components/Marquee";
 import Reel from "@/components/Reel";
 import StackPanel from "@/components/StackPanel";
+import Services from "@/components/Services";
 import Contact from "@/components/Contact";
-import { capabilities, meta, profile } from "@/content/site";
+import { capabilities, featured, meta, profile, projects } from "@/content/site";
 
 /**
  * Google requires a ProfilePage to name its mainEntity. The person's full node
@@ -38,8 +39,18 @@ export default function Page() {
       />
       <Hero />
       <Intro />
+      <Services />
       <Marquee items={capabilities} />
-      <Reel />
+      <Reel
+        items={featured.map((project) => ({
+          id: project.id,
+          name: project.name,
+          tier: project.tier,
+          lede: project.lede.recruiter,
+          stack: project.stack.slice(0, 5),
+        }))}
+        total={projects.length}
+      />
       <StackPanel />
       <Contact />
     </>

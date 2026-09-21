@@ -4,11 +4,13 @@ import { contact, profile } from "@/content/site";
 import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 import EmailLink from "@/components/EmailLink";
+import BookCallLink from "@/components/BookCallLink";
+import WhatsAppLink from "@/components/WhatsAppLink";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with Muhammad Ammaad Tehseen — full-stack engineer in Lahore, Pakistan. Open to contract and full-time work, remote, any timezone.",
+    "Hire Muhammad Ammaad Tehseen — full-stack and AI engineer in Lahore, Pakistan, taking freelance projects. Email, WhatsApp or a 30-minute call; remote, any timezone.",
   alternates: { canonical: "/contact" },
   openGraph: {
     type: "website",
@@ -36,6 +38,10 @@ export default function ContactPage() {
         <p className="text-muted u-prose mt-6 text-lg">{contact.body}</p>
 
         <EmailLink />
+        <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <BookCallLink className="text-muted hover:text-signal" />
+          <WhatsAppLink className="text-muted hover:text-signal" />
+        </div>
       </header>
 
       <div className="mt-16 grid gap-px sm:grid-cols-2">
@@ -110,7 +116,7 @@ export default function ContactPage() {
         </div>
         <div>
           <span className="u-engrave">Open to</span>
-          <p className="text-muted mt-2 text-sm">Contract and full-time, remote</p>
+          <p className="text-muted mt-2 text-sm">Freelance projects, remote</p>
         </div>
         <div>
           <span className="u-engrave">Read first</span>
