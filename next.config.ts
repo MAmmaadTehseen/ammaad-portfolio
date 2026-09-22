@@ -1,13 +1,19 @@
 import type { NextConfig } from "next";
 
+/** Old project URLs that search engines may still hold. */
+const MOVED: Record<string, string> = {
+  em: "/work",
+  "psx-tracker": "/work",
+  samosa: "/work/samosa-rain-alert",
+};
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
-  // projects that moved from their own page to the one-line "Also built" list
   async redirects() {
-    return ["em", "samosa"].map((slug) => ({
+    return Object.entries(MOVED).map(([slug, destination]) => ({
       source: `/work/${slug}`,
-      destination: "/work",
+      destination,
       permanent: true,
     }));
   },

@@ -1103,6 +1103,132 @@ export const projects: Project[] = [
     },
   },
 
+  {
+    id: "junassan",
+    name: "Closet by Junassan — Fashion Storefront",
+    tier: "open",
+    depth: "showcase",
+    year: "2026",
+    role: "Design & full-stack",
+    lede: {
+      client:
+        "A mobile-first storefront for a Pakistani fashion thrift label, shoppable like an Instagram feed — with an admin the owners run the whole shop from.",
+      recruiter:
+        "Designed and built end to end: Next.js 16, React 19, Tailwind v4 and Supabase, with a full admin for products, drops, orders, customers, reviews and sales analytics, and cash-on-delivery checkout.",
+      engineer:
+        "Orders go through one Postgres function that locks each product row, re-prices from the database and decrements stock atomically — the browser never decides a price, and an out-of-stock item fails the whole order.",
+    },
+    stack: [
+      "Next.js 16",
+      "React 19",
+      "TypeScript",
+      "Tailwind v4",
+      "Supabase",
+      "PostgreSQL",
+      "Row-Level Security",
+      "Zustand",
+      "Supabase Storage",
+    ],
+    links: [
+      { label: "Live", href: "https://closet-by-junassan.vercel.app" },
+      { label: "Source", href: "https://github.com/MAmmaadTehseen/closet-by-junassan" },
+    ],
+    outcomes: [
+      "A shop that feels like the label's Instagram — product grid, rails, and weekly drops pinned under the hero as stories",
+      "Filters, deals, a wishlist, order tracking and stock-urgency badges built for shopping on a phone",
+      "Social proof from real recent orders, and reviews collected through a personal link on each order",
+      "An admin with revenue and orders by day, top products, CSV order export and a command palette to jump anywhere",
+    ],
+    internals: [
+      "create_order is one Postgres function: row locks, trusted price rehydration and an atomic stock decrement",
+      "Row-level security leaves products readable and everything else deny-by-default; the admin sits behind its own auth",
+      "Product images through Supabase Storage with an admin uploader; drops, reviews and order email each added as their own migration",
+      "Brand details, contact and WhatsApp number live in one config file, so the owners change copy without touching components",
+      "Checkout is structured so a payment gateway can be added later without rewriting the flow",
+    ],
+    flow: {
+      nodes: [
+        { id: "shopper", label: "Shopper", sub: "mobile-first", col: 1, row: 2, kind: "edge" },
+        { id: "store", label: "Storefront", sub: "Next.js 16", col: 2, row: 2, kind: "service" },
+        { id: "drops", label: "Drops", sub: "weekly stories", col: 3, row: 1, kind: "edge" },
+        { id: "rpc", label: "Order function", sub: "locks · stock", col: 3, row: 2, kind: "worker" },
+        { id: "reviews", label: "Reviews", sub: "per-order link", col: 3, row: 3, kind: "edge" },
+        { id: "db", label: "Supabase", sub: "RLS · storage", col: 4, row: 2, kind: "store" },
+        { id: "admin", label: "Admin", sub: "analytics · orders", col: 5, row: 2, kind: "service" },
+      ],
+      edges: [
+        { from: "shopper", to: "store" },
+        { from: "store", to: "drops", label: "stories" },
+        { from: "store", to: "rpc" },
+        { from: "store", to: "reviews", label: "review" },
+        { from: "rpc", to: "db", label: "atomic" },
+        { from: "drops", to: "db" },
+        { from: "reviews", to: "db" },
+        { from: "admin", to: "db", label: "manage" },
+      ],
+    },
+  },
+  {
+    id: "finance-manager",
+    name: "Batwa — Personal Finance Tracker",
+    tier: "live",
+    depth: "showcase",
+    year: "2026",
+    role: "Solo build",
+    lede: {
+      client:
+        "A personal finance tracker for Pakistan that you never have to type into: it reads the SMS your bank already sends, files each transaction, and only asks when it genuinely does not know.",
+      recruiter:
+        "Solo build across web and mobile: a Vite and React 19 PWA and an Expo Android app sharing one TypeScript core, on Supabase with row-level security, plus a native Kotlin SMS capture module and over-the-air updates.",
+      engineer:
+        "There is no bespoke API: both apps talk to Postgres directly behind row-level security, and bank SMS reach one ingest function through a native receiver, a notification-listener fallback and a retry queue.",
+    },
+    stack: [
+      "React 19",
+      "TypeScript",
+      "Vite PWA",
+      "Expo (React Native)",
+      "Kotlin",
+      "Supabase",
+      "PostgreSQL",
+      "Row-Level Security",
+      "React Query",
+      "EAS Update",
+    ],
+    links: [{ label: "Live", href: "https://finance-manager-eight-omega.vercel.app" }],
+    outcomes: [
+      "Spending logged automatically from the bank SMS you already receive",
+      "Transactions categorised from what you have taught it, with a review inbox for anything new",
+      "Installable on the web, with a native Android app",
+      "Multi-user, with every person's data private to them",
+    ],
+    internals: [
+      "An npm-workspaces monorepo: the PWA and the Android app share one core — types, money handling, the Supabase client and the whole React Query data layer",
+      "Android capture through a manifest-registered SMS receiver, a notification-listener fallback and a WorkManager retry queue, all posting to one Edge Function",
+      "Money stored as numeric(14,2), always positive, with direction taken from the transaction type — never a signed float",
+      "iOS has no SMS API, so capture there is deliberately manual rather than faked",
+    ],
+    flow: {
+      nodes: [
+        { id: "bank", label: "Bank SMS", sub: "every transaction", col: 1, row: 2, kind: "edge" },
+        { id: "android", label: "Android app", sub: "Kotlin receiver", col: 2, row: 2, kind: "service" },
+        { id: "retry", label: "Retry queue", sub: "WorkManager", col: 3, row: 3, kind: "worker" },
+        { id: "ingest", label: "sms-ingest", sub: "categorises", col: 3, row: 2, kind: "worker" },
+        { id: "db", label: "Supabase", sub: "RLS · per user", col: 4, row: 2, kind: "store" },
+        { id: "inbox", label: "Review inbox", sub: "only the unknowns", col: 5, row: 1, kind: "edge" },
+        { id: "web", label: "Web PWA", sub: "installable", col: 5, row: 3, kind: "edge" },
+      ],
+      edges: [
+        { from: "bank", to: "android", label: "SMS" },
+        { from: "android", to: "ingest", label: "POST" },
+        { from: "android", to: "retry", label: "offline" },
+        { from: "ingest", to: "db" },
+        { from: "db", to: "inbox", label: "unsure" },
+        { from: "db", to: "web", label: "sync" },
+      ],
+    },
+  },
+
   /* ========================== short entries ========================= */
   {
     id: "destiny-ai",
@@ -1132,128 +1258,95 @@ export const projects: Project[] = [
     name: "Jarvis — Accountability Bot",
     tier: "open",
     depth: "short",
-    year: "2026",
-    role: "Solo build",
-    lede: {
-      client: "A bot that keeps me honest about what I am learning — and does it in public.",
-      recruiter: "Self-hosted Telegram accountability bot in TypeScript, storing progress in DynamoDB and deployed on AWS.",
-      engineer: "Telegram updates in, progress stored in DynamoDB, running on AWS — built to run unattended.",
-    },
-    stack: ["TypeScript", "Telegram Bot API", "DynamoDB", "AWS"],
-    links: [{ label: "Source", href: "https://github.com/MAmmaadTehseen/jarvis" }],
-  },
-  {
-    id: "ai-manager",
-    name: "Cross-Department Early Warning System",
-    tier: "closed",
-    depth: "short",
-    year: "2026",
-    role: "Architect & engineer",
+    year: "2026 — now",
+    role: "Personal project · ongoing",
     lede: {
       client:
-        "A fire alarm for your business. It watches the everyday work tools across every department and alerts the right manager the moment something looks like real trouble.",
+        "An ongoing personal project: a bot that runs my learning in public — one focus a day, an evening check-in, and a weekly scorecard I post on LinkedIn.",
       recruiter:
-        "Self-directed product. Ingests activity from workplace tools, classifies it for risk, and routes alerts to the manager who owns that area.",
+        "Self-hosted Discord bot in TypeScript on AWS Lambda and DynamoDB, running at $0 a month on the free tier. Every AWS and DevOps skill I pick up gets applied to it first.",
       engineer:
-        "A connector per tool feeding one normalised event stream, an LLM classification pass with a confidence floor, then routing rules that decide escalate, digest, or drop.",
+        "It started on Telegram; when that API turned out to be blocked where I live, the transport moved to Discord without the domain or database layers changing a line.",
     },
-    stack: ["TypeScript", "Node.js", "LLM classification", "Webhooks", "Slack API", "PostgreSQL"],
+    stack: ["TypeScript", "Discord API", "AWS Lambda", "DynamoDB", "Fastify", "Zod", "GitHub Actions"],
+    links: [{ label: "Source", href: "https://github.com/MAmmaadTehseen/jarvis" }],
     outcomes: [
-      "Problems surface while they are still cheap to fix",
-      "Managers get the one alert that matters, not another feed to read",
+      "Each morning names the day's one focus; each evening asks whether it happened",
+      "Notices two missed days in a row and says so",
+      "Turns the logs into a weekly scorecard with streaks, and drafts the daily “what I learned” post",
     ],
     internals: [
-      "Normalising wildly different tool payloads into one event shape is the entire problem",
-      "A confidence floor plus a digest tier keeps false positives from training people to ignore it",
-    ],
-    flow: {
-      nodes: [
-        { id: "tools", label: "Work tools", sub: "chat · tickets", col: 1, row: 2, kind: "edge" },
-        { id: "ingest", label: "Connectors", sub: "normalise", col: 2, row: 2, kind: "service" },
-        { id: "class", label: "Classifier", sub: "risk + confidence", col: 3, row: 2, kind: "worker" },
-        { id: "rules", label: "Routing", sub: "escalate · digest", col: 4, row: 2, kind: "service" },
-        { id: "store", label: "Event log", sub: "PostgreSQL", col: 3, row: 3, kind: "store" },
-        { id: "alert", label: "Manager", sub: "Slack · email", col: 5, row: 2, kind: "edge" },
-      ],
-      edges: [
-        { from: "tools", to: "ingest" },
-        { from: "ingest", to: "class", label: "events" },
-        { from: "ingest", to: "store", dashed: true },
-        { from: "class", to: "rules", label: "scored" },
-        { from: "rules", to: "alert", label: "alert" },
-      ],
-    },
-  },
-  {
-    id: "psx-tracker",
-    name: "PSX Tracker",
-    tier: "open",
-    depth: "short",
-    year: "2026",
-    role: "Solo build",
-    lede: {
-      client: "Follow the Pakistan Stock Exchange without opening five tabs.",
-      recruiter: "TypeScript app tracking PSX market data. Public source.",
-      engineer:
-        "A scheduled fetch normalised into a queryable series, with the display layer kept deliberately dumb.",
-    },
-    stack: ["TypeScript", "Next.js", "Scheduled jobs"],
-    links: [
-      { label: "Live", href: "https://psx-tracker-eight.vercel.app" },
-      { label: "Source", href: "https://github.com/MAmmaadTehseen/psx-tracker" },
+      "The rule: every AWS and DevOps skill gets applied to Jarvis first — Terraform, least-privilege IAM, OIDC deploys, alarms that report through Jarvis itself",
+      "Tests cover date maths, scoring, streaks and Discord signature verification",
     ],
   },
   {
     id: "namaz-reminder",
-    name: "Namaz Reminder",
+    name: "Namaz Reminder — Slack Prayer Bot",
     tier: "open",
     depth: "short",
     year: "2026",
-    role: "Solo build",
-    lede: {
-      client: "Prayer times that reach you at the right moment, wherever you are.",
-      recruiter: "TypeScript app for location-aware prayer times and reminders.",
-      engineer:
-        "Prayer times are a solved calculation but a fiddly one — location, method and timezone all have to agree before a notification is worth sending.",
-    },
-    stack: ["TypeScript", "Next.js", "Notifications"],
-    links: [{ label: "Source", href: "https://github.com/MAmmaadTehseen/namaz-reminder" }],
-  },
-  {
-    id: "finance-manager",
-    name: "Finance Manager",
-    tier: "open",
-    depth: "short",
-    year: "2026",
-    role: "Solo build",
-    lede: {
-      client: "See where the money went without a spreadsheet.",
-      recruiter: "TypeScript personal-finance tracker. Public source.",
-      engineer:
-        "Category rules over an append-only transaction ledger, so re-categorising something never rewrites history.",
-    },
-    stack: ["TypeScript", "Next.js", "PostgreSQL"],
-    links: [{ label: "Source", href: "https://github.com/MAmmaadTehseen/Fiance-manager" }],
-  },
-  {
-    id: "junassan",
-    name: "Fashion Storefront",
-    tier: "open",
-    depth: "short",
-    year: "2026",
-    role: "Full-stack developer",
+    role: "Built for my company",
     lede: {
       client:
-        "A clothing label's storefront — catalogue, collections and checkout, built to be run by the people who own it.",
-      recruiter: "Client e-commerce build in TypeScript and Next.js, storefront through to admin.",
+        "Built for my company: the team keeps prayer times in a Slack Canvas, and a few minutes before each one the bot posts the reminder in the channel — nobody has to remember to.",
+      recruiter:
+        "Slack bot in TypeScript, driven by a team-edited Slack Canvas and run free on GitHub Actions every five minutes, with a kill switch, weekend and holiday skips and per-prayer messages.",
       engineer:
-        "Catalogue and cart resolved on the server, so a price is never something the browser gets to decide.",
+        "Exactly-once on a five-minute cron: each tick parses the Canvas, posts whatever is due, then commits a dedupe marker back to the repo so a retry never double-posts.",
     },
-    stack: ["TypeScript", "Next.js", "React", "Tailwind"],
-    links: [
-      { label: "Live", href: "https://closet-by-junassan.vercel.app" },
-      { label: "Source", href: "https://github.com/MAmmaadTehseen/closet-by-junassan" },
+    stack: ["TypeScript", "Slack API", "Slack Canvas", "GitHub Actions", "Zod", "Next.js"],
+    links: [{ label: "Source", href: "https://github.com/MAmmaadTehseen/namaz-reminder" }],
+    outcomes: [
+      "Prayer reminders posted to the team channel a few minutes before each time",
+      "Times edited by anyone in a Slack Canvas — no code, no redeploy",
+      "Weekends and holidays skipped, with a kill switch and custom messages per prayer",
     ],
+    internals: [
+      "All logic in framework-agnostic TypeScript, shared by the CI script and an optional dashboard",
+      "A strict line parser over the Canvas: anything that does not match is ignored, never guessed at",
+      "Runs free on a GitHub Actions cron, with the committed dedupe marker making every post exactly-once",
+    ],
+  },
+  {
+    id: "samosa-rain-alert",
+    name: "Samosa Rain Alert",
+    tier: "closed",
+    depth: "short",
+    year: "2026",
+    role: "Built for the office",
+    lede: {
+      client:
+        "A rain alert for the office: it checks three weather services every hour and messages me when rain is likely that afternoon — so the samosa party gets proposed before the rain, not after.",
+      recruiter:
+        "Hourly GitHub Actions job in Node.js that queries Open-Meteo, MET Norway and WeatherAPI in parallel and sends a Slack DM on a majority vote.",
+      engineer:
+        "Three sources vote on the 1–6pm window and two must agree; a source that times out drops out of the vote instead of failing the run, and a cached marker keeps it to one message a day.",
+    },
+    stack: ["Node.js", "GitHub Actions", "Open-Meteo", "MET Norway", "WeatherAPI", "Slack API", "Luxon"],
+    outcomes: [
+      "A Slack message only when rain is genuinely likely that afternoon",
+      "At most one alert a day",
+    ],
+    internals: [
+      "A source votes rain if any hour in the window crosses a 40% chance or 0.2 mm an hour",
+      "Eight-second timeout per source; a dead source is dropped from the vote, never fatal",
+      "OpenWeatherMap left out on purpose — its free tier is three-hourly, too coarse for a five-hour window",
+    ],
+  },
+  {
+    id: "ai-manager",
+    name: "AI Manager",
+    tier: "closed",
+    depth: "short",
+    year: "2026 — now",
+    role: "Personal project · ongoing",
+    lede: {
+      client: "An ongoing personal project, still under wraps. More when it ships.",
+      recruiter: "Ongoing personal product, built solo in TypeScript. Details held back until launch.",
+      engineer: "Ongoing and under wraps — happy to walk through the architecture on a call.",
+    },
+    stack: ["TypeScript", "Node.js", "LLMs"],
   },
 ];
 
@@ -1261,7 +1354,6 @@ export const projects: Project[] = [
 export const alsoBuilt: { name: string; note: string }[] = [
   { name: "Event Snapshot", note: "QR-code event photo sales — guests scan, pay and download their photos" },
   { name: "Porta-cabin booking site", note: "Landing page, booking form and admin table for a luxury cabin rental" },
-  { name: "Samosa Rain Alert", note: "Office bot that cross-checks three weather sources and posts to Slack before it rains" },
   { name: "em", note: "Minimal note-taking app for personal sensemaking — open source" },
 ];
 
