@@ -396,7 +396,7 @@ export const projects: Project[] = [
   },
   {
     id: "discover-live",
-    name: "Discover Live — Live Virtual Tour Platform",
+    name: "Discover Live — Tour Marketplace",
     tier: "live",
     depth: "showcase",
     featured: true,
@@ -404,56 +404,49 @@ export const projects: Project[] = [
     role: "Full-stack developer",
     lede: {
       client:
-        "Live virtual tours where a real local guide walks a city on camera and the audience steers — with an AI travel companion and captions translated live into 18 languages.",
+        "The marketplace behind live virtual tours: experts create and sell tours, explorers book and pay, and everything after the booking — the hand-off to the live session, feedback, cancellations and refunds — runs on its own.",
       recruiter:
-        "Full-stack on a Zoom-style tour platform of around 61,000 lines: Next.js 15, React 19 and Convex over the Zoom Video SDK, with Gemini for the AI companion and live translation, and S3 and Google Cloud Run in the recording pipeline.",
+        "Built the booking marketplace for a live virtual-tour company: tour creation, Stripe checkout, an API integration that provisions each tour on the separate streaming platform, post-tour feedback, cancellations and refunds, and dashboards for experts and explorers.",
       engineer:
-        "Live caption translation takes a reserve, apply, release lock on each segment, so a hundred viewers reading the same language trigger one translation rather than a hundred.",
+        "Two systems with a clean boundary: the marketplace owns people and payments, the streaming platform owns the live tour. A confirmed booking provisions the tour through that platform's API; everything around it stays in the marketplace.",
     },
     stack: [
-      "Next.js 15",
-      "React 19",
-      "TypeScript",
-      "Convex",
-      "Zoom Video SDK",
-      "Gemini 2.5 Flash",
-      "Supabase Auth",
-      "AWS S3",
-      "Google Cloud Run",
-      "next-intl (18 locales)",
-      "OpenStreetMap + Wikidata",
+      "Stripe checkout",
+      "Stripe refunds",
+      "REST API integration",
+      "Booking engine",
+      "Expert dashboard",
+      "Explorer dashboard",
     ],
     links: [{ label: "Live", href: "https://marketplace.discover.live/" }],
     outcomes: [
-      "Guided tours streamed live, with pins, raised hands, reactions and quiz leaderboards",
-      "Adora, an AI travel companion that answers questions during the tour",
-      "Captions and chat translated live across 18 languages",
-      "Every tour recorded and archived automatically once it ends",
+      "Experts create and publish tours without touching code",
+      "Explorers book and pay through Stripe",
+      "Each booking provisions the live tour on the streaming platform automatically",
+      "Feedback, cancellations and refunds handled after the tour",
+      "Separate dashboards for experts and for explorers",
     ],
     internals: [
-      "One Zoom provider assembled from nine domain hooks — session, media, participants, captions, commands, screen share, recording, quality and extras",
-      "Pins, raised hands, reactions and quiz leaderboards ride Zoom's command channel rather than the database",
-      "Points of interest come from a durable workflow — fetch, clean, enrich, cache — warmed up to six hours before a tour starts",
-      "When a tour ends its recording is polled from Zoom's cloud and handed to a Cloud Run job for upload",
-      "Tour data is server-rendered first, then kept live by Convex subscriptions",
+      "The marketplace and the live platform are separate systems; the only thing that crosses between them is the API call that creates the tour",
+      "Payment, cancellation and refund all run through Stripe from the marketplace side",
     ],
     flow: {
       nodes: [
-        { id: "guide", label: "Local guide", sub: "live on camera", col: 1, row: 1, kind: "edge" },
-        { id: "viewers", label: "Viewers", sub: "18 languages", col: 1, row: 3, kind: "edge" },
-        { id: "zoom", label: "Zoom Video SDK", sub: "9 domain hooks", col: 2, row: 2, kind: "service" },
-        { id: "convex", label: "Convex", sub: "live tour state", col: 3, row: 2, kind: "store" },
-        { id: "gemini", label: "Gemini", sub: "Adora · captions", col: 4, row: 1, kind: "worker" },
-        { id: "poi", label: "POI workflow", sub: "OSM · Wikidata", col: 4, row: 3, kind: "worker" },
-        { id: "rec", label: "Recordings", sub: "Cloud Run → S3", col: 5, row: 2, kind: "edge" },
+        { id: "expert", label: "Expert", sub: "creates tours", col: 1, row: 1, kind: "edge" },
+        { id: "explorer", label: "Explorer", sub: "books a tour", col: 1, row: 2, kind: "edge" },
+        { id: "market", label: "Marketplace", sub: "tours · bookings", col: 2, row: 2, kind: "service" },
+        { id: "stripe", label: "Stripe", sub: "pay · refund", col: 3, row: 1, kind: "edge" },
+        { id: "api", label: "Tour API", sub: "provisions a tour", col: 3, row: 2, kind: "worker" },
+        { id: "after", label: "After the tour", sub: "feedback · refunds", col: 3, row: 3, kind: "service" },
+        { id: "live", label: "Live platform", sub: "separate system", col: 4, row: 2, kind: "edge" },
       ],
       edges: [
-        { from: "guide", to: "zoom", label: "stream" },
-        { from: "viewers", to: "zoom", label: "join" },
-        { from: "zoom", to: "convex" },
-        { from: "convex", to: "gemini", label: "translate" },
-        { from: "convex", to: "poi", label: "warm-up" },
-        { from: "convex", to: "rec", label: "tour ends" },
+        { from: "expert", to: "market", label: "publish" },
+        { from: "explorer", to: "market" },
+        { from: "market", to: "stripe", label: "checkout" },
+        { from: "market", to: "api" },
+        { from: "api", to: "live", label: "create" },
+        { from: "market", to: "after", label: "follow-up" },
       ],
     },
   },
@@ -996,6 +989,49 @@ export const projects: Project[] = [
     },
   },
   {
+    id: "ai-manager",
+    name: "AI Manager — Early Warning for Teams",
+    tier: "closed",
+    depth: "showcase",
+    year: "2026 — now",
+    role: "Personal project · ongoing",
+    lede: {
+      client:
+        "An ongoing product built on one idea: trouble in a business rarely arrives unannounced. It shows up first as small signals in everyday tools — and AI Manager exists to notice them and tell the right person early.",
+      recruiter:
+        "Ongoing solo product in TypeScript: connectors into everyday work tools, an AI judgement layer, and routing that decides who needs to know. Shown here as a concept while it is in development.",
+      engineer:
+        "The principle is that an alert has to earn its interruption: signals are normalised into one shape, judged with a confidence floor, then escalated, gathered into a digest, or dropped.",
+    },
+    stack: ["TypeScript", "Node.js", "LLMs", "Webhooks", "Event normalisation"],
+    outcomes: [
+      "Problems surface while they are still cheap to fix",
+      "Each manager gets the one alert that matters, not another feed to read",
+      "Quiet by default — silence means nothing needs you",
+    ],
+    internals: [
+      "Wildly different tools reduced to one event shape before anything is judged",
+      "A confidence floor and a digest tier, so false alarms never train people to ignore it",
+    ],
+    flow: {
+      nodes: [
+        { id: "tools", label: "Everyday tools", sub: "where work happens", col: 1, row: 2, kind: "edge" },
+        { id: "signals", label: "Signals", sub: "one shape", col: 2, row: 2, kind: "service" },
+        { id: "judge", label: "AI judgement", sub: "confidence floor", col: 3, row: 2, kind: "worker" },
+        { id: "digest", label: "Digest", sub: "can wait", col: 4, row: 3, kind: "store" },
+        { id: "route", label: "Routing", sub: "who owns it", col: 4, row: 2, kind: "service" },
+        { id: "person", label: "The right person", sub: "told early", col: 5, row: 2, kind: "edge" },
+      ],
+      edges: [
+        { from: "tools", to: "signals" },
+        { from: "signals", to: "judge" },
+        { from: "judge", to: "route", label: "urgent" },
+        { from: "judge", to: "digest", label: "later" },
+        { from: "route", to: "person" },
+      ],
+    },
+  },
+  {
     id: "case-study-generator",
     name: "AI Case Study Generator",
     tier: "closed",
@@ -1334,27 +1370,12 @@ export const projects: Project[] = [
       "OpenWeatherMap left out on purpose — its free tier is three-hourly, too coarse for a five-hour window",
     ],
   },
-  {
-    id: "ai-manager",
-    name: "AI Manager",
-    tier: "closed",
-    depth: "short",
-    year: "2026 — now",
-    role: "Personal project · ongoing",
-    lede: {
-      client: "An ongoing personal project, still under wraps. More when it ships.",
-      recruiter: "Ongoing personal product, built solo in TypeScript. Details held back until launch.",
-      engineer: "Ongoing and under wraps — happy to walk through the architecture on a call.",
-    },
-    stack: ["TypeScript", "Node.js", "LLMs"],
-  },
 ];
 
 /** One line each, no page: real work, too small or too private for more. */
 export const alsoBuilt: { name: string; note: string }[] = [
   { name: "Event Snapshot", note: "QR-code event photo sales — guests scan, pay and download their photos" },
   { name: "Porta-cabin booking site", note: "Landing page, booking form and admin table for a luxury cabin rental" },
-  { name: "em", note: "Minimal note-taking app for personal sensemaking — open source" },
 ];
 
 // pure-annotated so a client bundle that never uses these can still drop the
@@ -1376,7 +1397,6 @@ export const stackGroups: { label: string; note: string; items: string[] }[] = [
     items: [
       "Supabase",
       "NestJS",
-      "Convex",
       "OpenAI",
       "LangChain",
       "ChromaDB",
@@ -1395,8 +1415,6 @@ export const stackGroups: { label: string; note: string; items: string[] }[] = [
     note: "Shipped with them, would not call myself a specialist",
     items: [
       "n8n",
-      "Zoom Video SDK",
-      "Gemini",
       "Twilio",
       "MongoDB",
       "Mailgun",
