@@ -1345,15 +1345,15 @@ export const projects: Project[] = [
     ],
   },
   {
-    id: "samosa-rain-alert",
-    name: "Samosa Rain Alert",
+    id: "rain-alert",
+    name: "Rain Alert",
     tier: "closed",
     depth: "short",
     year: "2026",
     role: "Built for the office",
     lede: {
       client:
-        "A rain alert for the office: it checks three weather services every hour and messages me when rain is likely that afternoon — so the samosa party gets proposed before the rain, not after.",
+        "A rain alert for the office: it checks three weather services every hour and messages me when rain is likely that afternoon — so plans get made before the rain, not after.",
       recruiter:
         "Hourly GitHub Actions job in Node.js that queries Open-Meteo, MET Norway and WeatherAPI in parallel and sends a Slack DM on a majority vote.",
       engineer:

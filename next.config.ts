@@ -4,7 +4,8 @@ import type { NextConfig } from "next";
 const MOVED: Record<string, string> = {
   em: "/work",
   "psx-tracker": "/work",
-  samosa: "/work/samosa-rain-alert",
+  samosa: "/work/rain-alert",
+  "samosa-rain-alert": "/work/rain-alert",
 };
 
 const nextConfig: NextConfig = {
