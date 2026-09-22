@@ -1,118 +1,95 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion, useMotionValueEvent, useScroll, useSpring } from "motion/react";
 import { profile } from "@/content/site";
+import Avatar from "./Avatar";
+import AvailDot from "./AvailDot";
+import BookCallLink from "./BookCallLink";
+import EmailLink from "./EmailLink";
+import WhatsAppLink from "./WhatsAppLink";
+import LocalTime from "./islands/LocalTime";
+import MenuDialog from "./islands/MenuDialog";
+import NavState, { NavLinks, NavProgress } from "./islands/NavState";
 
-// real routes rather than home-page anchors, so the nav works identically from
-// a project page as from the home page
-const LINKS = [
-  { label: "Work", href: "/work" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-];
+/** "Ammaad Tehseen": the name he goes by, with the family name from profile.name. */
+const FULL = `${profile.short} ${profile.name.split(" ").slice(-1)[0]}`;
 
-function LocalTime() {
-  const [time, setTime] = useState<string | null>(null);
-
-  useEffect(() => {
-    // rendered client-only: the server has no business guessing Lahore's clock
-    const format = () =>
-      new Intl.DateTimeFormat("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: profile.timezone,
-      }).format(new Date());
-
-    setTime(format());
-    const id = window.setInterval(() => setTime(format()), 15_000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  if (!time) return null;
-  return (
-    <span className="u-mono text-dim hidden text-[11px] sm:inline">
-      {time} <span className="text-dim/70">PKT</span>
-    </span>
-  );
-}
-
-/** Ignore sub-pixel jitter and trackpad noise; only a deliberate move counts. */
-const DIRECTION_THRESHOLD = 6;
-/** Above this, the page is "at the top" and the header defers to the hero. */
-const TOP_ZONE = 90;
-
+/**
+ * The fixed header on every page.
+ *
+ * Server markup inside three small islands: NavState owns the <header> and
+ * its two scroll attributes, NavLinks marks the current page, and NavProgress
+ * adds the reading line on case pages. At the top of a page it is a
+ * transparent full-width row; past 80px it condenses into a solid pill and
+ * drops the clock; past 480px it tucks away while reading down and comes back
+ * on any upward scroll or as soon as keyboard focus lands inside it.
+ *
+ * Below 768px the links move into the Menu sheet, and the name shortens to
+ * "Ammaad". "Book a call" stays in the bar at every width: it is the one
+ * action every page leads to.
+ */
 export default function Nav() {
-  const { scrollY, scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 220, damping: 40, mass: 0.4 });
-  const pathname = usePathname();
-  const isHome = pathname === "/";
-
-  // Hidden while reading downward, back on the first flick upward. At the very
-  // top of the home page it stays out of the way entirely, so the hero is the
-  // whole screen rather than a hero with a bar across it.
-  const [hidden, setHidden] = useState(false);
-  const previous = useRef(0);
-
-  useEffect(() => {
-    setHidden(isHome && window.scrollY < TOP_ZONE);
-    previous.current = window.scrollY;
-  }, [isHome]);
-
-  useMotionValueEvent(scrollY, "change", (y) => {
-    const delta = y - previous.current;
-    if (Math.abs(delta) < DIRECTION_THRESHOLD) return;
-    previous.current = y;
-
-    if (y < TOP_ZONE) {
-      setHidden(isHome);
-      return;
-    }
-    setHidden(delta > 0);
-  });
-
   return (
-    <motion.header
-      className="border-line-soft bg-bg/80 fixed inset-x-0 top-0 border-b backdrop-blur-md"
-      style={{ zIndex: "var(--z-nav)" }}
-      animate={{ y: hidden ? "-102%" : "0%" }}
-      transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {/* the scroll position, read as a signal level */}
-      <motion.div
-        className="bg-signal absolute inset-x-0 top-0 h-px origin-left"
-        style={{ scaleX: progress }}
-        aria-hidden
-      />
+    <NavState>
+      <div className="nav-pill">
+        <nav
+          aria-label="Main"
+          className="flex min-h-14 items-center gap-4 py-1.5 pr-1.5 pl-2 md:gap-8 md:pr-2 md:pl-3"
+        >
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <span className="relative inline-flex">
+              <Avatar size={32} />
+              <AvailDot className="ring-bg absolute -right-0.5 -bottom-0.5 ring-2" />
+            </span>
+            <span className="t-ui text-ink font-medium">
+              <span className="max-[23rem]:sr-only md:hidden">
+                {profile.short}
+              </span>
+              <span className="hidden md:inline">{FULL}</span>
+            </span>
+          </Link>
 
-      <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-3 sm:px-8">
-        <Link href="/" className="group flex items-center gap-2.5" data-cursor="Home">
-          <span className={`u-led ${profile.available ? "u-led-live" : ""}`} aria-hidden />
-          <span className="u-mono text-ink text-[11px] tracking-[0.14em] uppercase">
-            {profile.short}
-          </span>
-        </Link>
+          <NavLinks
+            variant="bar"
+            className="hidden items-center gap-6 md:flex"
+          />
 
-        <div className="flex items-center gap-5 sm:gap-7">
-          <LocalTime />
-          <ul className="flex items-center gap-4 sm:gap-6">
-            {LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  data-cursor={link.label}
-                  className="u-mono text-muted hover:text-ink text-[11px] tracking-[0.12em] uppercase transition-colors duration-200"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
-    </motion.header>
+          <div className="ml-auto flex items-center gap-2 md:gap-5">
+            {/* the wrapper carries .nav-clock: LocalTime's own inline-block would outrank it */}
+            <span className="nav-clock t-meta">
+              <LocalTime variant="short" />
+            </span>
+            <BookCallLink arrow={false} className="px-4">
+              Book a call
+            </BookCallLink>
+            <MenuDialog>
+              <nav aria-label="Pages" className="mt-6">
+                <NavLinks variant="menu" className="space-y-2" />
+              </nav>
+
+              <div
+                className="menu-item border-line mt-10 flex flex-col items-start gap-3 border-t pt-8"
+                style={{ "--i": 3 } as CSSProperties}
+              >
+                <BookCallLink className="w-full" />
+                <div className="flex w-full flex-wrap gap-3">
+                  <WhatsAppLink className="flex-1" />
+                  <EmailLink variant="ghost" className="flex-1" />
+                </div>
+              </div>
+
+              <p
+                className="menu-item t-meta mt-auto flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-10"
+                style={{ "--i": 4 } as CSSProperties}
+              >
+                <AvailDot />
+                {profile.available && <span>{profile.availableNote}</span>}
+                <LocalTime variant="sentence" />
+              </p>
+            </MenuDialog>
+          </div>
+        </nav>
+        <NavProgress />
+      </div>
+    </NavState>
   );
 }

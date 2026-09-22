@@ -10,6 +10,9 @@ const MOVED: Record<string, string> = {
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
+  // AVIF first: the portrait is the heaviest byte on the page and the LCP
+  // candidate on home, and AVIF roughly halves it against WebP
+  images: { formats: ["image/avif", "image/webp"] },
   async redirects() {
     return Object.entries(MOVED).map(([slug, destination]) => ({
       source: `/work/${slug}`,

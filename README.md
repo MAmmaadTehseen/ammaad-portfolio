@@ -1,35 +1,33 @@
-# Read-out — ammaad.online
+# Afterglow — ammaad.online
 
-Personal portfolio for **Muhammad Ammaad Tehseen** — full-stack engineer, Lahore.
+Personal portfolio and freelance sales page for **Muhammad Ammaad Tehseen**, a
+full-stack and AI engineer in Lahore.
 
-Built as a precision instrument panel: anodised olive housing, machined type, one
-hot amber signal. The idea is that a portfolio should read like a piece of
-equipment you tune, not a brochure you scroll.
+The design is called **Afterglow**. The page is a dark, quiet room lit only by
+the sunset in his own photograph. The sky from that photo spills onto the page,
+the offer sentence switches on word by word, the light sinks as you scroll, the
+architecture diagrams switch on node by node like windows at dusk, and every
+page ends under a warm lamp that follows your hand. Things come into focus;
+they do not fly in. One moment plays once per session, and everything else
+answers the reader's scroll or pointer.
 
-## The one thing that makes this site different
+The full design system (tokens, type, layout, every effect and its
+reduced-motion path) is in [`DESIGN.md`](DESIGN.md). Audience, voice and
+content rules are in [`PRODUCT.md`](PRODUCT.md).
 
-Most portfolios pick one audience and lose the other two. This one has a
-**channel switch** — `Client · Recruiter · Engineer` — and the whole page retunes
-to it:
+## Who it is for
 
-| Channel | Gets |
-| --- | --- |
-| **Client** | What each build does for a business, and the outcomes |
-| **Recruiter** | Role, scope, and the stack on each project |
-| **Engineer** | The real internals — the decisions and the landmines |
+Clients first: founders and operations leads who want one of four things built
+or fixed. Recruiters and engineers get their depth further down, in "My part",
+"How it fits together", "Under the hood" and the short-version readings. The
+site never retunes itself for them.
 
-The choice persists in `localStorage`, so a returning visitor lands back on their
-own channel.
+## Honest disclosure
 
-## Three tiers of disclosure
-
-Work is labelled by how much of it is on the record:
-
-- **Open** — source is public, link included.
-- **Live** — running in production for someone right now.
-- **Closed** — private source. Instead of a screenshot you get an **animated
-  architecture diagram**: the actual services, stores and queues, with packets
-  travelling the real request path. You can show the work without showing the code.
+Most of the work is private client software, so instead of screenshots each
+system is **drawn**: an architecture diagram generated from real data, with a
+plain-text version beside it. Every project states its tier in words: Live,
+Open source or Private source.
 
 ## Editing it
 
@@ -39,67 +37,62 @@ Everything the site renders lives in one file:
 src/content/site.ts
 ```
 
-Profile, bio (all three channels), capabilities, projects, stack groups, and the
-flow diagrams. No component edits needed to change copy or add a project.
-
-To add a project, append to `projects` with a `tier`, a `lede` for each of the
-three channels, and optionally `outcomes` (client), `internals` (engineer), and a
-`flow` diagram.
-
-> **One decision left for you:** project 01 is described by capability with the
-> client unnamed — the safe default for client software. If you have the go-ahead
-> to name them, there is a comment in `site.ts` marking exactly what to change.
+Profile, bio, services, projects, flow diagrams, stack and contact copy. Edit
+only that file to change copy or add a project; no component edits are needed.
+Every count on the site is derived from its arrays, never typed by hand.
 
 ## Running it
 
 ```bash
 npm install
 npm run dev
-```
-
-```bash
 npm run build
-```
-
-```bash
 npm run typecheck
 ```
 
+`npx jiti scripts/check-flows.ts` checks every diagram's geometry (no label
+chip over a node, no overlapping chips, one node per cell).
+
 ## Stack
 
-Next.js 15 (App Router, fully static) · TypeScript · Tailwind v4 · Motion · Lenis.
-The hero trace is a hand-written WebGL fragment shader — a few hundred bytes
-instead of a 3D library.
-
-## Findable
-
-- A generated Open Graph card (`src/app/opengraph-image.tsx`), so a link posted
-  to LinkedIn or X renders as the instrument panel rather than a bare URL.
-- Linked structured data: `WebSite`, `Person`, `ProfilePage` and an `ItemList`
-  of all nine projects with their summaries and stacks. The work is the
-  substance of the site, and this is the channel that describes it to a machine
-  without adding a node to the DOM.
-- All three bios ship in the HTML. Rendering only the selected channel kept two
-  thirds of the writing — the keyword-dense two thirds — away from crawlers.
-- The `h1` carries the full name and role for readers and crawlers; the six-letter
-  wordmark beside it is decoration.
+Next.js 15 (App Router, fully static) · React 19 · TypeScript · Tailwind v4.
+Motion is CSS: scroll-driven animations where the browser supports them,
+static otherwise. Lenis is loaded only for fine pointers with motion allowed,
+and the `motion` library only on /work, after the first mouse hover over the
+list. Fonts are Ysabeau Office and Afacad Flux, self-hosted through
+`next/font`.
 
 ## Craft notes
 
-- **Contrast is verified, not guessed.** Ink 17:1, muted 7.7:1, dim 5.4:1,
-  primary 9.9:1, signal 8.5:1 — all against the page background.
-- **Reduced motion is a real path, not a stub.** The boot sequence is skipped, the
-  shader renders one composed frame, reveals drop their transforms, the cursor
-  reverts to the OS pointer, and diagram packets are not rendered at all.
-- **Nothing is gated on JavaScript.** A `<noscript>` rule un-hides every reveal and
-  removes the boot panel, so the page is fully readable if scripts never run.
-- **The boot sequence runs once per session**, gated by a pre-paint inline script
-  so a repeat visitor never sees it flash in and out.
-- **Animation cost is measured, not assumed.** Against the first build, on a
-  full-page scroll: 2.2 -> 10.8 average FPS, canvas fill down 64%, running
-  animations 14 -> 4, DOM nodes 710 -> 568. The shader stops dead when the hero
-  leaves the viewport (verified at zero draw calls) and resumes on the way back.
-- Nothing animates a blur filter, and the pointer never renders React.
+- **Nothing is gated on JavaScript.** All content is in the server HTML. Start
+  states exist only after a pre-paint class, never begin from opacity 0, and a
+  3-second failsafe removes them if scripts never hydrate. No-script and print
+  show everything.
+- **Reduced motion is a designed path.** No light-ups, scrubs, loops or smooth
+  scrolling; diagrams render complete and the capability band becomes a static
+  list.
+- **Contrast is computed, not guessed.** Dimmed text uses a colour token that
+  holds 5.2:1 or better, never opacity.
+- **Two loops on the whole site** (the capability band and the availability
+  dot), both paused off-screen. No WebGL, no custom cursor, no idle frame work.
+
+## Budgets
+
+- First Load JS at most 110 KB gz on `/`, `/about`, `/contact` and case pages;
+  `/work` at most 112 KB before interaction; the lazy preview chunk at most
+  25 KB gz.
+- Client islands on home at most 6 KB gz in total.
+- HTML: home at most 160 KB raw / 32 KB gz; `/work` at most 120 KB raw /
+  26 KB gz.
+- Fonts: exactly two woff2 files, at most 80 KB together.
+- Lighthouse mobile: LCP 2.0 s or less, CLS 0.02 or less, TBT 100 ms or less,
+  Performance 95+, Accessibility 100, SEO 100.
+
+## Findable
+
+- Linked JSON-LD (`WebSite`, `Person`, the work list, and `ProfilePage` on the
+  home page only), per-page canonicals and Open Graph cards generated with
+  `next/og`, plus a sitemap and robots.
 
 ## Deploying
 
@@ -109,6 +102,6 @@ Static output, so anything works. Vercel is the path of least resistance:
 npx vercel --prod
 ```
 
-Then point **ammaad.online** at it. Change the domain in one place —
-`profile.site` in `src/content/site.ts` — and metadata, canonical URL, sitemap,
+Then point **ammaad.online** at it. Change the domain in one place,
+`profile.site` in `src/content/site.ts`, and metadata, canonical URLs, sitemap,
 robots and JSON-LD all follow.

@@ -1,33 +1,50 @@
+import type { ReactNode } from "react";
 import { profile } from "@/content/site";
 
-/** The 30-minute intro call. `primary` is the filled button; otherwise a quiet link. */
+type Variant = "primary" | "glint";
+
+/**
+ * The 30-minute intro call, the site's primary action.
+ *
+ * `primary` is the filled apricot pill (.btn-glow). `glint` is the same
+ * button drawn with the conic border (.glint-cta) that sweeps once on hover
+ * or focus; with `arrival` it also sweeps once when RevealRoot first sees it,
+ * which is how the closing room and /contact announce it. It opens the
+ * booking page in a new tab, so the sr-only note says so rather than letting
+ * a screen reader user find out by losing their place.
+ */
 export default function BookCallLink({
-  primary = false,
+  variant = "primary",
+  children = "Book a 30-minute call",
+  arrow = true,
+  arrival = variant === "glint",
   className,
 }: {
-  primary?: boolean;
+  variant?: Variant;
+  /** The visible label. The nav uses the short "Book a call". */
+  children?: ReactNode;
+  /** The trailing → that nudges on hover. */
+  arrow?: boolean;
+  /** Glint variant only: sweep once on first view. On by default for glint. */
+  arrival?: boolean;
   className?: string;
 }) {
+  const look = variant === "glint" ? "btn glint-cta" : "btn btn-glow";
   return (
     <a
       href={profile.booking}
       target="_blank"
       rel="noreferrer noopener"
-      data-cursor="Book a call"
-      className={
-        primary
-          ? `bg-signal text-bg u-mono inline-flex items-center gap-2 px-5 py-3 text-[11px] tracking-[0.14em] uppercase transition-opacity hover:opacity-90 ${className ?? ""}`
-          : `group u-mono inline-flex items-center gap-2.5 text-[12px] tracking-[0.12em] uppercase transition-colors ${className ?? ""}`
-      }
+      data-reveal={variant === "glint" && arrival ? "glint" : undefined}
+      className={className ? `${look} ${className}` : look}
     >
-      {!primary && <span className="bg-signal h-1.5 w-1.5 rounded-full" aria-hidden />}
-      Book a 30-min call
-      <span
-        className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-        aria-hidden
-      >
-        ↗
-      </span>
+      {children}
+      {arrow && (
+        <span className="arr" aria-hidden="true">
+          →
+        </span>
+      )}
+      <span className="sr-only"> (opens in a new tab)</span>
     </a>
   );
 }
