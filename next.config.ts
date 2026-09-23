@@ -6,6 +6,8 @@ const MOVED: Record<string, string> = {
   "psx-tracker": "/work",
   samosa: "/work/rain-alert",
   "samosa-rain-alert": "/work/rain-alert",
+  // the meeting automation is now told as one project with the meeting platform
+  "meeting-automation": "/work/ai-meeting-platform",
 };
 
 const nextConfig: NextConfig = {
