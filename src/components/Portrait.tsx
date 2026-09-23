@@ -141,7 +141,7 @@ export default function Portrait({
       {/* the sunset in the photograph, spilling onto the page behind the plate.
           Its brightness is scrubbed by scroll position (portrait-glow), so the
           lamp comes up as the plate reaches the middle of the screen. */}
-      <span aria-hidden className="portrait-glow pointer-events-none absolute -inset-8 -z-10" />
+      <span aria-hidden className="portrait-glow pointer-events-none absolute inset-0 -z-10" />
 
       <div className="u-panel u-chamfer relative p-1.5">
         <div ref={wellRef} className="bg-surface-2 relative aspect-[4/5] overflow-hidden">
@@ -278,7 +278,10 @@ export default function Portrait({
   if (!href) return plate;
 
   return (
-    <Link href={href} className="block w-fit" aria-label={`About ${profile.name}`}>
+    // w-full, not w-fit: a shrink-to-fit link makes the plate's own
+    // w-[min(Npx,100%)] resolve against its own content, so the photograph came
+    // out far smaller than it was asked to be.
+    <Link href={href} className="block w-full" aria-label={`About ${profile.name}`}>
       {plate}
     </Link>
   );

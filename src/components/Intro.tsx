@@ -15,10 +15,19 @@ export default function Intro() {
 
   return (
     <section id="index" className="mx-auto max-w-[1400px] scroll-mt-24 px-5 py-24 sm:px-8 sm:py-32">
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)] lg:gap-16">
+      {/* The photograph was 300px against a 1.4fr column of text, which left the
+          left column mostly empty and made the only picture on the site an
+          afterthought. It now takes the column it is in. */}
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
         <Reveal>
           <div className="lg:sticky lg:top-28">
-            <Portrait href="/about" sizes="300px" className="mb-12 w-[min(300px,100%)]" />
+            <Portrait
+              href="/about"
+              sizes="(min-width:1024px) 420px, (min-width:640px) 60vw, 92vw"
+              // the corner brackets hang 8px outside the frame, so on a phone
+              // the plate leaves room for them rather than pushing the page wide
+              className="mx-2 mb-10 w-[min(420px,calc(100%-1rem))] lg:mx-0"
+            />
             <span className="u-engrave">Reading as</span>
             <div className="mt-4">
               <ChannelSwitch />

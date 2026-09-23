@@ -276,7 +276,7 @@ html.boot-done #boot { display: none; }
         color-mix(in oklch, var(--color-signal) 38%, transparent),
         transparent 78%
       );
-      filter: blur(26px);
+      filter: blur(38px);
       opacity: 0;
       animation: portrait-lamp linear both;
       animation-timeline: view();
