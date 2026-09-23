@@ -118,7 +118,7 @@ export default function Portrait({
         py.set(0.5);
       }}
       style={{ rotateX, rotateY, transformPerspective: 900 }}
-      className={`group relative ${className ?? ""}`}
+      className={`portrait-plate group relative ${className ?? ""}`}
     >
       {/* brackets lock on from outside the frame, and open a little on hover */}
       {CORNERS.map((corner, index) => (
@@ -138,36 +138,46 @@ export default function Portrait({
         </motion.span>
       ))}
 
+      {/* the sunset in the photograph, spilling onto the page behind the plate.
+          Its brightness is scrubbed by scroll position (portrait-glow), so the
+          lamp comes up as the plate reaches the middle of the screen. */}
+      <span aria-hidden className="portrait-glow pointer-events-none absolute -inset-8 -z-10" />
+
       <div className="u-panel u-chamfer relative p-1.5">
         <div ref={wellRef} className="bg-surface-2 relative aspect-[4/5] overflow-hidden">
           <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.045]">
-            {/* the undeveloped plate */}
-            <Image
-              src={profile.photo.src}
-              alt=""
-              aria-hidden
-              fill
-              sizes={sizes}
-              priority={priority}
-              className="object-cover brightness-[0.5] contrast-125 grayscale"
-            />
-            {/* developed colour, uncovered by the scan */}
-            <motion.div
-              className="absolute inset-0"
-              variants={{
-                hidden: { clipPath: "inset(0% 0% 100% 0%)" },
-                shown: { clipPath: "inset(0% 0% 0% 0%)", transition: scanTime },
-              }}
-            >
+            {/* Both plates drift together against the frame as the page scrolls
+                (portrait-drift), which is what makes the photograph feel set
+                into the panel rather than pasted on it. */}
+            <div className="portrait-drift absolute inset-0">
+              {/* the undeveloped plate */}
               <Image
                 src={profile.photo.src}
-                alt={profile.photo.alt}
+                alt=""
+                aria-hidden
                 fill
                 sizes={sizes}
                 priority={priority}
-                className="object-cover"
+                className="object-cover brightness-[0.5] contrast-125 grayscale"
               />
-            </motion.div>
+              {/* developed colour, uncovered by the scan */}
+              <motion.div
+                className="absolute inset-0"
+                variants={{
+                  hidden: { clipPath: "inset(0% 0% 100% 0%)" },
+                  shown: { clipPath: "inset(0% 0% 0% 0%)", transition: scanTime },
+                }}
+              >
+                <Image
+                  src={profile.photo.src}
+                  alt={profile.photo.alt}
+                  fill
+                  sizes={sizes}
+                  priority={priority}
+                  className="object-cover"
+                />
+              </motion.div>
+            </div>
           </div>
 
           {/* fine scanline texture, so the photo sits in the panel's material */}
@@ -236,23 +246,23 @@ export default function Portrait({
             className="pointer-events-none absolute inset-0 flex flex-col justify-between"
           >
             <div className="flex items-start justify-between p-2.5">
-              <span className="u-mono text-ink bg-bg/70 inline-flex items-center gap-1.5 px-1.5 py-1 text-[9px] tracking-[0.16em] uppercase backdrop-blur-sm">
+              <span className="u-mono text-ink bg-bg/70 inline-flex items-center gap-1.5 px-1.5 py-1 text-[11px] tracking-[0.16em] uppercase backdrop-blur-sm">
                 <span className={`u-led ${profile.available ? "u-led-live" : ""}`} />
                 {profile.available ? "Available" : "Booked"}
               </span>
-              <span className="u-mono text-ink/80 bg-bg/70 px-1.5 py-1 text-[9px] tracking-[0.16em] uppercase backdrop-blur-sm">
+              <span className="u-mono text-ink/80 bg-bg/70 px-1.5 py-1 text-[11px] tracking-[0.16em] uppercase backdrop-blur-sm">
                 UTC+5
               </span>
             </div>
             <div className="from-bg/85 bg-gradient-to-t to-transparent px-2.5 pt-10 pb-2.5">
-              <span className="u-mono text-ink/85 text-[9px] tracking-[0.16em] whitespace-pre">
+              <span className="u-mono text-ink/85 text-[11px] tracking-[0.16em] whitespace-pre">
                 {COORDS}
               </span>
             </div>
           </motion.div>
         </div>
 
-        <figcaption className="u-mono text-dim flex items-center justify-between gap-3 px-1 pt-2.5 pb-0.5 text-[10px] tracking-[0.14em] uppercase">
+        <figcaption className="u-mono text-dim flex items-center justify-between gap-3 px-1 pt-2.5 pb-0.5 text-[11px] tracking-[0.14em] uppercase">
           <ScrambleText
             text={`${profile.short} Tehseen`}
             runKey={revealed ? "revealed" : null}
@@ -268,7 +278,7 @@ export default function Portrait({
   if (!href) return plate;
 
   return (
-    <Link href={href} data-cursor="About me" className="block w-fit" aria-label={`About ${profile.name}`}>
+    <Link href={href} className="block w-fit" aria-label={`About ${profile.name}`}>
       {plate}
     </Link>
   );

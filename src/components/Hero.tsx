@@ -129,7 +129,6 @@ export default function Hero() {
           </span>
           <a
             href="#index"
-            data-cursor="Read on"
             className="u-mono text-dim hover:text-signal group flex items-center gap-2 text-[11px] tracking-[0.14em] uppercase transition-colors"
           >
             Scroll

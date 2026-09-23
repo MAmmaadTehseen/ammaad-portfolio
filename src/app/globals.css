@@ -31,7 +31,6 @@
   --z-base: 1;
   --z-sticky: 20;
   --z-nav: 30;
-  --z-cursor: 60;
   --z-boot: 80;
 }
 
@@ -42,7 +41,6 @@
   --z-nav: 30;
   --z-overlay: 40;
   --z-modal: 50;
-  --z-cursor: 60;
   --z-boot: 80;
 }
 
@@ -186,14 +184,6 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-line); }
 
-/* ---------- custom cursor: only where a real pointer exists ---------- */
-@media (hover: hover) and (pointer: fine) {
-  html.has-cursor,
-  html.has-cursor * {
-    cursor: none !important;
-  }
-}
-
 /* ---------- reduced motion: every animation gets an alternative ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -205,8 +195,6 @@ body {
     scroll-behavior: auto !important;
   }
   .u-led-live { animation: none; }
-  html.has-cursor,
-  html.has-cursor * { cursor: auto !important; }
 
   /* JS-driven motion writes inline transforms, which CSS animation rules above
      cannot reach. Components render one element tree for everyone (branching on
@@ -251,4 +239,75 @@ html.boot-done #boot { display: none; }
     filter: none !important;
   }
   #boot { display: none !important; }
+}
+
+/* ---------- the portrait, scrubbed by scroll ----------
+   Scroll-driven CSS: no JavaScript, no scroll listener, nothing to run when the
+   plate is off screen. Browsers without view() timelines (Safari, Firefox
+   today) simply get the static plate, which is why neither rule sets a start
+   state outside the @supports block. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* the photograph drifts against its frame — slower than the page, so the
+       plate reads as a window rather than a sticker. The scale covers the
+       travel, so no edge of the frame is ever empty. */
+    /* The timeline is named on the plate itself, not taken with view() on the
+       drifting layer: that layer sits inside the frame's overflow:hidden well,
+       whose scrollport never scrolls, so its own view() progress is pinned at
+       0.5 forever. The plate is outside the well, so its scrollport is the
+       page. */
+    .portrait-plate {
+      view-timeline-name: --plate;
+      view-timeline-axis: block;
+    }
+
+    .portrait-drift {
+      animation: portrait-drift linear both;
+      animation-timeline: --plate;
+      animation-range: cover 0% cover 100%;
+      will-change: transform;
+    }
+
+    /* the spill behind the plate: dark at the edges of the screen, warmest
+       when the photograph is centred */
+    .portrait-glow {
+      background: radial-gradient(
+        closest-side,
+        color-mix(in oklch, var(--color-signal) 38%, transparent),
+        transparent 78%
+      );
+      filter: blur(26px);
+      opacity: 0;
+      animation: portrait-lamp linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes portrait-drift {
+  from { transform: translate3d(0, 5%, 0) scale(1.12); }
+  to { transform: translate3d(0, -5%, 0) scale(1.12); }
+}
+
+@keyframes portrait-lamp {
+  0% { opacity: 0; }
+  50% { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+/* a rail you scroll yourself: the native scrollbar is replaced by the gauge
+   under it, but the container stays a real scroll container, so the wheel,
+   a thumb, the arrow buttons and Tab all still move it */
+.u-rail {
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.u-rail::-webkit-scrollbar {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-rail {
+    scroll-behavior: auto;
+  }
 }

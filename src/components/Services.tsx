@@ -50,7 +50,6 @@ export default function Services() {
                       <li key={id}>
                         <Link
                           href={`/work/${id}`}
-                          data-cursor={shortName(project.name)}
                           className="u-mono text-muted hover:text-signal group inline-flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase transition-colors"
                         >
                           {shortName(project.name)}
@@ -76,7 +75,6 @@ export default function Services() {
         <WhatsAppLink className="text-muted hover:text-signal" />
         <Link
           href="/contact"
-          data-cursor="Start a project"
           className="u-mono text-muted hover:text-signal text-[12px] tracking-[0.12em] uppercase transition-colors"
         >
           Or write it down →

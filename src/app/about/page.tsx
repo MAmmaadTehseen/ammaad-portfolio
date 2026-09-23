@@ -120,7 +120,7 @@ export default function AboutPage() {
                   {group.items.map((item) => (
                     <li
                       key={item}
-                      className="u-mono border-line-soft bg-surface-2 text-muted border px-2 py-1 text-[10px]"
+                      className="u-mono border-line-soft bg-surface-2 text-muted border px-2 py-1 text-[11px]"
                     >
                       {item}
                     </li>
@@ -135,14 +135,12 @@ export default function AboutPage() {
       <nav className="border-line-soft mt-16 flex flex-wrap gap-x-8 gap-y-3 border-t pt-8">
         <Link
           href="/work"
-          data-cursor="Work"
           className="u-mono text-ink hover:text-signal text-[11px] tracking-[0.14em] uppercase transition-colors"
         >
           See the work →
         </Link>
         <Link
           href="/contact"
-          data-cursor="Contact"
           className="u-mono text-dim hover:text-signal text-[11px] tracking-[0.14em] uppercase transition-colors"
         >
           Get in touch →

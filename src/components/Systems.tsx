@@ -29,7 +29,7 @@ function TierChip({ tier }: { tier: Tier }) {
   return (
     <span className="inline-flex items-center gap-1.5" title={TIERS[tier].note}>
       <span className={`h-1.5 w-1.5 rounded-full ${TIER_DOT[tier]}`} aria-hidden />
-      <span className="u-mono text-dim text-[10px] tracking-[0.14em] uppercase">
+      <span className="u-mono text-dim text-[11px] tracking-[0.14em] uppercase">
         {TIERS[tier].label}
       </span>
     </span>
@@ -77,7 +77,7 @@ function Detail({ project, channel }: { project: Project; channel: Channel }) {
         className="border-line-soft mb-5 flex flex-wrap items-center justify-between gap-3 border-b pb-4"
       >
         <TierChip tier={project.tier} />
-        <span className="u-mono text-dim text-[10px] tracking-[0.14em] uppercase">
+        <span className="u-mono text-dim text-[11px] tracking-[0.14em] uppercase">
           {project.year}
         </span>
       </Item>
@@ -111,7 +111,7 @@ function Detail({ project, channel }: { project: Project; channel: Channel }) {
           {project.stack.map((entry) => (
             <li
               key={entry}
-              className="u-mono border-line-soft bg-surface-2 text-muted border px-2 py-1 text-[10px] tracking-[0.06em]"
+              className="u-mono border-line-soft bg-surface-2 text-muted border px-2 py-1 text-[11px] tracking-[0.06em]"
             >
               {entry}
             </li>
@@ -123,7 +123,7 @@ function Detail({ project, channel }: { project: Project; channel: Channel }) {
         <Item {...itemProps} className="mt-8">
           <div className="mb-3 flex items-baseline justify-between gap-4">
             <span className="u-engrave">Signal path</span>
-            <span className="u-mono text-dim/80 text-[10px]">
+            <span className="u-mono text-dim/80 text-[11px]">
               {project.tier === "closed" ? "source private" : "architecture"}
             </span>
           </div>
@@ -142,7 +142,6 @@ function Detail({ project, channel }: { project: Project; channel: Channel }) {
               href={link.href}
               target="_blank"
               rel="noreferrer noopener"
-              data-cursor={link.label}
               className="u-mono text-ink hover:text-signal group inline-flex items-center gap-2 text-[11px] tracking-[0.12em] uppercase transition-colors"
             >
               {link.label}
@@ -331,7 +330,6 @@ export default function Systems({
                   onClick={() => setActiveIndex(index)}
                   onMouseEnter={() => setActiveIndex(index)}
                   onFocus={() => setActiveIndex(index)}
-                  data-cursor={project.name}
                   aria-expanded={isActive}
                   // taller on lg so the list runs roughly as long as the sticky
                   // readout beside it, instead of ending in dead scroll
@@ -379,7 +377,6 @@ export default function Systems({
                     reaches every project */}
                 <Link
                   href={`/work/${project.id}`}
-                  data-cursor="Open"
                   aria-label={`${project.name} — full detail`}
                   className="u-mono text-dim hover:text-signal shrink-0 px-1 text-sm transition-colors"
                 >

@@ -89,7 +89,7 @@ export default function Nav() {
       />
 
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-3 sm:px-8">
-        <Link href="/" className="group flex items-center gap-2.5" data-cursor="Home">
+        <Link href="/" className="group flex items-center gap-2.5">
           <span className={`u-led ${profile.available ? "u-led-live" : ""}`} aria-hidden />
           <span className="u-mono text-ink text-[11px] tracking-[0.14em] uppercase">
             {profile.short}
@@ -103,7 +103,6 @@ export default function Nav() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  data-cursor={link.label}
                   className="u-mono text-muted hover:text-ink text-[11px] tracking-[0.12em] uppercase transition-colors duration-200"
                 >
                   {link.label}

@@ -9,7 +9,6 @@ export default function WhatsAppLink({ className }: { className?: string }) {
       href={`https://wa.me/${profile.whatsapp.number}?text=${encodeURIComponent(OPENER)}`}
       target="_blank"
       rel="noreferrer noopener"
-      data-cursor="WhatsApp"
       className={`group u-mono inline-flex items-center gap-2.5 text-[12px] tracking-[0.12em] uppercase transition-colors ${className ?? ""}`}
     >
       <span className="bg-primary h-1.5 w-1.5 rounded-full" aria-hidden />

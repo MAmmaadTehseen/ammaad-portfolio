@@ -87,7 +87,6 @@ export default function ContactPage() {
                 href={social.href}
                 target="_blank"
                 rel="noreferrer noopener me"
-                data-cursor={social.label}
                 className="group flex items-baseline justify-between gap-4 py-5"
               >
                 <span className="u-display text-muted group-hover:text-ink text-xl transition-colors">
@@ -121,7 +120,7 @@ export default function ContactPage() {
         <div>
           <span className="u-engrave">Read first</span>
           <p className="mt-2 text-sm">
-            <Link href="/work" className="text-signal hover:underline" data-cursor="Work">
+            <Link href="/work" className="text-signal hover:underline">
               The work →
             </Link>
           </p>

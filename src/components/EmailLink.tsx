@@ -16,7 +16,6 @@ export default function EmailLink() {
       onMouseLeave={magnet.onMouseLeave}
       onBlur={magnet.onBlur}
       href={`mailto:${profile.email}`}
-      data-cursor="Write to me"
       className="group text-signal mt-10 inline-flex flex-wrap items-center gap-3 text-[clamp(1.1rem,3.4vw,2rem)] break-all will-change-transform"
     >
       <span className="decoration-signal/40 underline-offset-8 group-hover:underline">

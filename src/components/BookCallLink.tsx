@@ -13,7 +13,6 @@ export default function BookCallLink({
       href={profile.booking}
       target="_blank"
       rel="noreferrer noopener"
-      data-cursor="Book a call"
       className={
         primary
           ? `bg-signal text-bg u-mono inline-flex items-center gap-2 px-5 py-3 text-[11px] tracking-[0.14em] uppercase transition-opacity hover:opacity-90 ${className ?? ""}`

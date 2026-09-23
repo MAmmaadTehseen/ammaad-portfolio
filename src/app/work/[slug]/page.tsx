@@ -96,13 +96,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       <nav aria-label="Breadcrumb" className="mb-10">
         <ol className="u-mono text-dim flex flex-wrap items-center gap-2 text-[11px] tracking-[0.12em] uppercase">
           <li>
-            <Link href="/" className="hover:text-signal transition-colors" data-cursor="Home">
+            <Link href="/" className="hover:text-signal transition-colors">
               {profile.short}
             </Link>
           </li>
           <li aria-hidden>/</li>
           <li>
-            <Link href="/work" className="hover:text-signal transition-colors" data-cursor="All work">
+            <Link href="/work" className="hover:text-signal transition-colors">
               Work
             </Link>
           </li>
@@ -115,11 +115,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <span className="inline-flex items-center gap-2" title={TIERS[project.tier].note}>
             <span className={`h-1.5 w-1.5 rounded-full ${TIER_DOT[project.tier]}`} aria-hidden />
-            <span className="u-mono text-dim text-[10px] tracking-[0.14em] uppercase">
+            <span className="u-mono text-dim text-[11px] tracking-[0.14em] uppercase">
               {TIERS[project.tier].label} — {TIERS[project.tier].note}
             </span>
           </span>
-          <span className="u-mono text-dim text-[10px] tracking-[0.14em] uppercase">
+          <span className="u-mono text-dim text-[11px] tracking-[0.14em] uppercase">
             {project.year}
           </span>
         </div>
@@ -227,7 +227,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                   href={link.href}
                   target="_blank"
                   rel="noreferrer noopener"
-                  data-cursor={link.label}
                   className="u-mono text-ink hover:text-signal group inline-flex items-center gap-2 text-xs tracking-[0.12em] uppercase transition-colors"
                 >
                   {link.label}
@@ -256,7 +255,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         {previous ? (
           <Link
             href={`/work/${previous.id}`}
-            data-cursor={previous.name}
             className="group u-panel u-chamfer p-5 transition-colors hover:border-line"
           >
             <span className="u-engrave">Previous</span>
@@ -270,7 +268,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         {next && (
           <Link
             href={`/work/${next.id}`}
-            data-cursor={next.name}
             className="group u-panel u-chamfer p-5 text-right transition-colors hover:border-line"
           >
             <span className="u-engrave">Next</span>
@@ -284,7 +281,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       <div className="mt-10">
         <Link
           href="/work"
-          data-cursor="All work"
           className="u-mono text-dim hover:text-signal text-[11px] tracking-[0.14em] uppercase transition-colors"
         >
           ← All work

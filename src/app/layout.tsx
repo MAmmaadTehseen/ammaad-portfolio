@@ -3,7 +3,6 @@ import { Archivo, Martian_Mono } from "next/font/google";
 import "./globals.css";
 import { ChannelProvider } from "@/lib/channel";
 import Boot from "@/components/Boot";
-import Cursor from "@/components/Cursor";
 import Nav from "@/components/Nav";
 import SmoothScroll from "@/components/SmoothScroll";
 import SiteFooter from "@/components/SiteFooter";
@@ -171,7 +170,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: BOOT_GATE }} />
         <noscript>
           {/* without JS there is no boot sequence to dismiss, so never show one */}
-          <style>{`#boot{display:none!important}[data-reveal]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
+          {/* [data-reveal] alone left the split headings and the motion-driven
+              bits invisible: they start hidden and are animated in by JS that
+              never runs here. Everything that hides itself for motion has to be
+              put back, or the page ships with holes in it. */}
+          <style>{`#boot{display:none!important}[data-reveal],[data-motion],[data-split] span{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}`}</style>
         </noscript>
         <script
           type="application/ld+json"
@@ -188,7 +191,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ChannelProvider>
           <Boot />
           <SmoothScroll />
-          <Cursor />
           <Nav />
           <div className="flex min-h-screen flex-col">
             <main className="flex-1">{children}</main>

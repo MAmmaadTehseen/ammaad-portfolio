@@ -74,17 +74,16 @@ export default function WorkIndex() {
             <Link
               key={project.id}
               href={`/work/${project.id}`}
-              data-cursor={project.name}
               className="group u-panel u-chamfer hover:border-line flex min-w-0 flex-col p-5 transition-colors"
             >
               <div className="flex items-center justify-between gap-3">
                 <span className="inline-flex items-center gap-1.5">
                   <span className={`h-1.5 w-1.5 rounded-full ${TIER_DOT[project.tier]}`} aria-hidden />
-                  <span className="u-mono text-dim text-[10px] tracking-[0.14em] uppercase">
+                  <span className="u-mono text-dim text-[11px] tracking-[0.14em] uppercase">
                     {TIERS[project.tier].label}
                   </span>
                 </span>
-                <span className="u-mono text-dim text-[10px] tracking-[0.14em]">{project.year}</span>
+                <span className="u-mono text-dim text-[11px] tracking-[0.14em]">{project.year}</span>
               </div>
               <h3 className="u-display text-muted group-hover:text-ink mt-5 text-lg transition-colors">
                 {project.name}

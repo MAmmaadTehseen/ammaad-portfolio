@@ -30,7 +30,6 @@ export default function SiteFooter() {
           </div>
           <a
             href={`mailto:${profile.email}`}
-            data-cursor="Write to me"
             className="text-signal mt-3 inline-block text-lg break-all hover:underline"
           >
             {profile.email}
@@ -49,7 +48,6 @@ export default function SiteFooter() {
                 <li key={section.href}>
                   <Link
                     href={section.href}
-                    data-cursor={section.label}
                     className="text-muted hover:text-ink text-sm transition-colors"
                   >
                     {section.label}
@@ -68,7 +66,6 @@ export default function SiteFooter() {
                     href={social.href}
                     target="_blank"
                     rel="noreferrer noopener me"
-                    data-cursor={social.label}
                     className="text-muted hover:text-ink group inline-flex items-center gap-2 text-sm transition-colors"
                   >
                     {social.label}
@@ -87,10 +84,10 @@ export default function SiteFooter() {
       </div>
 
       <div className="border-line-soft mx-auto mt-10 flex max-w-[1400px] flex-wrap items-center justify-between gap-3 border-t pt-6">
-        <span className="u-mono text-dim text-[10px] tracking-[0.12em] uppercase">
+        <span className="u-mono text-dim text-[11px] tracking-[0.12em] uppercase">
           © {year} {profile.name} — {profile.location}
         </span>
-        <span className="u-mono text-dim/70 text-[10px] tracking-[0.12em] uppercase">
+        <span className="u-mono text-dim/70 text-[11px] tracking-[0.12em] uppercase">
           Built with Next.js — no template
         </span>
       </div>
