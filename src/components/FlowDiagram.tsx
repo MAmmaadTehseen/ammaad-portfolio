@@ -1,337 +1,211 @@
-import type { CSSProperties } from "react";
-import type { Project } from "@/content/site";
-import {
-  checkLayout,
-  layoutFor,
-  type Flow,
-  type FlowKind,
-  type FlowLayout,
-  type LaidNode,
-} from "@/lib/flow-geometry";
-import { brand } from "@/lib/names";
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
+import type { FlowEdge, FlowNode } from "@/content/site";
+import { useInView } from "@/lib/useInView";
 
 /**
- * The architecture, drawn rather than screenshotted: how a request actually
- * moves through a system whose source is private.
+ * The architecture, drawn rather than screenshotted. This is what stands in
+ * for a product shot on work whose source is private: you cannot see the UI,
+ * but you can see exactly how a request moves through it.
  *
- * A server component. Everything that moves is CSS keyed off attributes an
- * island sets on the `.flow` wrapper (data-play, data-sent), so the markup
- * ships complete and lit: nothing here is hidden until JavaScript runs, and
- * there is no opacity="0" anywhere. Timing comes from --e on each edge and
- * --i on each node, both in flow order.
- *
- * Modes
- *   full      the detailed drawing, plus (by default) the transposed one for
- *             viewports of 700px and below, swapped by CSS, and the legend
- *   vertical  only the transposed drawing, always shown, plus the legend
- *   poster    the text-free silhouette, aria-hidden, for previews,
- *             backdrops and glyphs
+ * Paths use pathLength="1" so the travelling pulse is length-independent —
+ * one keyframe animates every edge correctly regardless of its geometry.
  */
 
-type Mode = "full" | "poster" | "vertical";
+const NODE_W = 152;
+const NODE_H = 62;
+const COL = 200;
+const ROW = 145;
+const VIEW_W = 1000;
+const VIEW_H = 420;
 
-type Props = {
-  project: Pick<Project, "id" | "name" | "flow">;
-  mode: Mode;
-  /**
-   * full / vertical: wait dark until an island sets data-play (featured
-   * stage panels, the case figure). Without it the drawing is simply there.
-   */
-  assemble?: boolean;
-  /** full: also render the transposed SVG for narrow viewports. Default true. */
-  vertical?: boolean;
-  /** full / vertical: render the legend under the drawing. Default true. */
-  legend?: boolean;
-  /** On the `.flow` wrapper, or on the poster's <svg>. */
-  className?: string;
-  /** full: replaces the wide SVG's default sizing classes. */
-  svgClassName?: string;
+const x = (col: number) => 16 + (col - 1) * COL;
+const y = (row: number) => 24 + (row - 1) * ROW;
+
+const KIND_STROKE: Record<FlowNode["kind"], string> = {
+  edge: "var(--color-line)",
+  service: "color-mix(in oklch, var(--color-primary) 55%, transparent)",
+  store: "color-mix(in oklch, var(--color-muted) 45%, transparent)",
+  worker: "color-mix(in oklch, var(--color-signal) 55%, transparent)",
 };
 
-const KIND_LABEL: Record<FlowKind, string> = {
-  edge: "Entry point",
-  service: "Service",
-  store: "Data store",
-  worker: "Background job",
-};
+/**
+ * Geometry for one edge. Parallel edges between the same two columns would
+ * otherwise share a corridor and stack their labels on top of each other, so
+ * each edge takes its vertical run at a slightly different fraction of the gap.
+ */
+function geometry(from: FlowNode, to: FlowNode, index: number) {
+  const forward = to.col >= from.col;
+  const sx = forward ? x(from.col) + NODE_W : x(from.col);
+  const tx = forward ? x(to.col) : x(to.col) + NODE_W;
+  const sy = y(from.row) + NODE_H / 2;
+  const ty = y(to.row) + NODE_H / 2;
+  const sameRow = from.row === to.row;
 
-// poster silhouettes tell the kinds apart by fill alone
-const POSTER_FILL: Record<FlowKind, string> = {
-  edge: "var(--muted)",
-  service: "var(--glow)",
-  store: "var(--ink-2)",
-  worker: "var(--dim)",
-};
+  const frac = 0.4 + (index % 3) * 0.1;
+  const midX = sx + (tx - sx) * frac;
 
-const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(" ");
-const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
-
-export function flowLabel(project: Pick<Project, "name" | "flow">): string {
-  const flow = project.flow;
-  if (!flow) return "";
-  return `How ${brand(project.name)} fits together: ${plural(flow.nodes.length, "part")}, ${plural(flow.edges.length, "connection")}`;
+  return {
+    d: sameRow ? `M ${sx} ${sy} H ${tx}` : `M ${sx} ${sy} H ${midX} V ${ty} H ${tx}`,
+    // same-row labels sit above the line; elbow labels sit beside the vertical
+    // run, which is unique to that edge
+    label: sameRow
+      ? { lx: sx + (tx - sx) / 2, ly: sy - 9, anchor: "middle" as const }
+      : { lx: midX + 7, ly: (sy + ty) / 2 + 3, anchor: "start" as const },
+  };
 }
 
 export default function FlowDiagram({
-  project,
-  mode,
-  assemble = false,
-  vertical = true,
-  legend = true,
+  nodes,
+  edges,
   className,
-  svgClassName,
-}: Props) {
-  const flow = project.flow;
-  if (!flow) return null;
-
-  if (mode === "poster") {
-    const laid = layoutFor(project, "full")!;
-    return <Poster laid={laid} className={className} />;
-  }
-
-  const label = flowLabel(project);
-  const wide = mode === "full" ? layoutFor(project, "full")! : undefined;
-  const tall = mode === "vertical" || vertical ? layoutFor(project, "vertical")! : undefined;
-  if (process.env.NODE_ENV === "development") {
-    if (wide) warnOnce(project.id, wide);
-    if (tall) warnOnce(project.id, tall);
-  }
+}: {
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+  className?: string;
+}) {
+  const reduced = useReducedMotion();
+  // packets are a compositor animation per edge; three screens away they are
+  // pure battery drain
+  const [wrapRef, inView] = useInView<HTMLDivElement>("150px");
+  const byId = new Map(nodes.map((node) => [node.id, node]));
 
   return (
-    <div
-      className={cx("flow min-w-0", className)}
-      data-assemble={assemble ? "" : undefined}
-      // lets an island time the packet pass (edges x 60 + 900ms) without
-      // shipping project data to the client
-      data-edges={flow.edges.length}
-    >
-      {/* a safety net: if a container is ever narrower than the drawing's
-          floor, it scrolls rather than shrinking labels past legibility */}
-      <div className="min-w-0 overflow-x-auto overscroll-x-contain">
-        {wide && (
-          <Drawing
-            laid={wide}
-            label={label}
-            className={cx(tall && "flow-full", svgClassName ?? "block h-auto w-full min-w-[640px]")}
-          />
-        )}
-        {tall && (
-          <Drawing
-            laid={tall}
-            label={label}
-            // capped at 1:1 so a two-row system is not blown up to fill a phone
-            className={cx(mode === "full" && "flow-vertical", "mx-auto block h-auto w-full")}
-            style={{ maxWidth: tall.width }}
-          />
-        )}
-      </div>
-      {legend && <FlowLegend flow={flow} />}
+    <div ref={wrapRef} className={`-mx-1 overflow-x-auto pb-2 ${className ?? ""}`}>
+      <svg
+        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+        className="h-auto w-full min-w-[680px]"
+        role="img"
+        aria-label={`Architecture: ${nodes.map((n) => n.label).join(", ")}`}
+      >
+        <defs>
+          <marker
+            id="flow-arrow"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="5"
+            markerHeight="5"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--color-line)" />
+          </marker>
+        </defs>
+
+        {edges.map((edge, index) => {
+          const from = byId.get(edge.from);
+          const to = byId.get(edge.to);
+          if (!from || !to) return null;
+          const { d, label } = geometry(from, to, index);
+
+          return (
+            <g key={`${edge.from}-${edge.to}`}>
+              <motion.path
+                d={d}
+                fill="none"
+                stroke="var(--color-line)"
+                strokeWidth={1}
+                strokeDasharray={edge.dashed ? "4 4" : undefined}
+                markerEnd="url(#flow-arrow)"
+                initial={{ pathLength: 0, opacity: 0 }}
+                whileInView={{ pathLength: 1, opacity: 1 }}
+                viewport={{ once: true, amount: 0.2 }}
+                // only the timing varies for reduced motion; branching the
+                // markup itself would be a hydration mismatch
+                transition={{
+                  duration: reduced ? 0 : 0.8,
+                  delay: reduced ? 0 : index * 0.07,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+              />
+
+              {/* the packet — always rendered, hidden in CSS for reduced motion */}
+              <path
+                data-pulse
+                d={d}
+                fill="none"
+                stroke="var(--color-signal)"
+                strokeWidth={2}
+                strokeLinecap="round"
+                pathLength={1}
+                strokeDasharray="0.045 0.955"
+                style={{
+                  animation: `flow-pulse 3.4s linear infinite`,
+                  animationDelay: `${index * 0.42}s`,
+                  animationPlayState: inView ? "running" : "paused",
+                }}
+              />
+
+              {edge.label && (
+                <text
+                  x={label.lx}
+                  y={label.ly}
+                  textAnchor={label.anchor}
+                  className="u-mono"
+                  fontSize="10"
+                  letterSpacing="0.08em"
+                  fill="var(--color-dim)"
+                >
+                  {edge.label}
+                </text>
+              )}
+            </g>
+          );
+        })}
+
+        {nodes.map((node, index) => (
+          <motion.g
+            key={node.id}
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{
+              duration: reduced ? 0 : 0.5,
+              delay: reduced ? 0 : 0.1 + index * 0.05,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            <rect
+              x={x(node.col)}
+              y={y(node.row)}
+              width={NODE_W}
+              height={NODE_H}
+              fill="var(--color-surface)"
+              stroke={KIND_STROKE[node.kind]}
+              strokeWidth={1}
+            />
+            {/* machined corner tick */}
+            <path
+              d={`M ${x(node.col)} ${y(node.row) + 10} V ${y(node.row)} H ${x(node.col) + 10}`}
+              fill="none"
+              stroke={node.kind === "worker" ? "var(--color-signal)" : "var(--color-primary)"}
+              strokeWidth={1.5}
+            />
+            <text
+              x={x(node.col) + 14}
+              y={y(node.row) + 27}
+              fill="var(--color-ink)"
+              fontSize="14"
+              fontWeight="600"
+            >
+              {node.label}
+            </text>
+            {node.sub && (
+              <text
+                x={x(node.col) + 14}
+                y={y(node.row) + 45}
+                className="u-mono"
+                fontSize="10"
+                letterSpacing="0.06em"
+                fill="var(--color-dim)"
+              >
+                {node.sub}
+              </text>
+            )}
+          </motion.g>
+        ))}
+      </svg>
     </div>
   );
-}
-
-/* ------------------------------------------------------------------ */
-
-function Drawing({
-  laid,
-  label,
-  className,
-  style,
-}: {
-  laid: FlowLayout;
-  label: string;
-  className?: string;
-  style?: CSSProperties;
-}) {
-  return (
-    <svg viewBox={laid.viewBox} role="img" aria-label={label} className={className} style={style}>
-      <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-        {laid.edges.map((edge) => (
-          <g key={`${edge.index}-${edge.from}-${edge.to}`} style={{ "--e": edge.order } as CSSProperties}>
-            {edge.dashed ? (
-              // scheduled or async; keeps its 6 6 dash, so it fades in instead of drawing
-              <path className="edge-dash" d={edge.d} stroke="var(--line-strong)" strokeWidth={1.4} strokeDasharray="6 6" />
-            ) : (
-              <path className="edge" d={edge.d} pathLength={1} stroke="var(--line-strong)" strokeWidth={1.4} />
-            )}
-            {/* a path of its own rather than a <marker>, so it can arrive after
-                its edge has drawn, and ids never collide between SVGs */}
-            <path className="edge-head" d={edge.head} stroke="var(--muted)" strokeWidth={1.4} />
-            <path className="pk" d={edge.d} pathLength={1} stroke="var(--glow)" strokeWidth={3} />
-          </g>
-        ))}
-      </g>
-
-      {laid.chips.length > 0 && (
-        <g>
-          {laid.chips.map((chip, i) => (
-            <g key={`${i}-${chip.text}`}>
-              <rect
-                x={chip.x}
-                y={chip.y}
-                width={chip.w}
-                height={chip.h}
-                rx={chip.h / 2}
-                fill="var(--bg-deep)"
-                stroke="var(--line)"
-              />
-              <text x={chip.cx} y={chip.baseline} textAnchor="middle" fontSize={13} fill="var(--muted)">
-                {chip.text}
-              </text>
-            </g>
-          ))}
-        </g>
-      )}
-
-      {laid.nodes.map((node) => (
-        <Node key={node.id} node={node} />
-      ))}
-    </svg>
-  );
-}
-
-function Node({ node }: { node: LaidNode }) {
-  return (
-    <g style={{ "--i": node.order } as CSSProperties}>
-      {node.back && (
-        <rect
-          className="node-box"
-          x={node.back.x}
-          y={node.back.y}
-          width={node.back.w}
-          height={node.back.h}
-          rx={10}
-          fill="var(--lit)"
-          stroke="var(--line)"
-        />
-      )}
-      <rect
-        className="node-box"
-        x={node.x}
-        y={node.y}
-        width={node.w}
-        height={node.h}
-        rx={node.rx}
-        fill="var(--lit)"
-        stroke="var(--line)"
-      />
-      {node.badge && (
-        // a circular arrow on the top edge: this part runs on its own
-        <g transform={`translate(${node.badge.x} ${node.badge.y})`}>
-          <circle r={10} fill="var(--bg-deep)" stroke="var(--line)" />
-          <path
-            d="M-5 0A5 5 0 1 0 0-5M3-8L0-5L3-2"
-            fill="none"
-            stroke="var(--muted)"
-            strokeWidth={1.4}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </g>
-      )}
-      <text x={node.cx} y={node.labelY} textAnchor="middle" fontSize={17} fontWeight={500} fill="var(--ink)">
-        {node.label}
-      </text>
-      {node.sub && node.subY !== undefined && (
-        <text x={node.cx} y={node.subY} textAnchor="middle" fontSize={13.5} fill="var(--muted)">
-          {node.sub}
-        </text>
-      )}
-    </g>
-  );
-}
-
-function Poster({ laid, className }: { laid: FlowLayout; className?: string }) {
-  return (
-    <svg viewBox={laid.posterViewBox} aria-hidden="true" focusable="false" className={className}>
-      {/* one group at 45%, so crossings do not darken where lines overlap */}
-      <g
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity={0.45}
-      >
-        {laid.edges.map((edge) => (
-          <path key={edge.index} d={edge.d} />
-        ))}
-      </g>
-      {laid.nodes.map((node) => (
-        <g key={node.id} fill={POSTER_FILL[node.kind]}>
-          {node.back && (
-            <rect x={node.back.x} y={node.back.y} width={node.back.w} height={node.back.h} rx={10} fillOpacity={0.55} />
-          )}
-          <rect x={node.x} y={node.y} width={node.w} height={node.h} rx={node.rx} />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-
-/**
- * What the shapes mean. Only the kinds this diagram uses are listed, plus
- * the dashed line when there is one.
- */
-export function FlowLegend({ flow, className }: { flow: Flow; className?: string }) {
-  const kinds = (Object.keys(KIND_LABEL) as FlowKind[]).filter((kind) =>
-    flow.nodes.some((node) => node.kind === kind),
-  );
-  const dashed = flow.edges.some((edge) => edge.dashed);
-
-  return (
-    <ul className={cx("t-legend mt-4 flex flex-wrap gap-x-5 gap-y-2", className)}>
-      {kinds.map((kind) => (
-        <li key={kind} className="inline-flex items-center gap-2">
-          <Swatch kind={kind} />
-          {KIND_LABEL[kind]}
-        </li>
-      ))}
-      {dashed && (
-        <li className="inline-flex items-center gap-2">
-          <svg viewBox="0 0 28 16" aria-hidden="true" className="h-4 w-7 shrink-0">
-            <path d="M1 8H27" stroke="var(--line-strong)" strokeWidth={1.4} strokeDasharray="4 3" />
-          </svg>
-          Scheduled
-        </li>
-      )}
-    </ul>
-  );
-}
-
-function Swatch({ kind }: { kind: FlowKind }) {
-  const box = { fill: "var(--lit)", stroke: "var(--line-strong)" };
-  return (
-    <svg viewBox="0 0 28 16" aria-hidden="true" className="h-4 w-7 shrink-0">
-      {kind === "edge" && <rect x={1} y={2} width={26} height={12} rx={6} {...box} />}
-      {kind === "service" && <rect x={1} y={2} width={26} height={12} rx={3} {...box} />}
-      {kind === "store" && (
-        <>
-          <rect x={4} y={1} width={23} height={11} rx={3} {...box} />
-          <rect x={1} y={4} width={23} height={11} rx={3} {...box} />
-        </>
-      )}
-      {kind === "worker" && (
-        <>
-          <rect x={1} y={4} width={26} height={11} rx={3} {...box} />
-          <circle cx={20} cy={4} r={3.5} fill="var(--bg-deep)" stroke="var(--line-strong)" />
-        </>
-      )}
-    </svg>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-
-// scripts/check-flows.ts is the gate; this only makes a broken diagram
-// loud while editing site.ts, once per diagram rather than per render
-const warned = new Set<string>();
-function warnOnce(id: string, laid: FlowLayout) {
-  const key = `${id}:${laid.mode}`;
-  if (warned.has(key)) return;
-  warned.add(key);
-  const errors = checkLayout(laid);
-  if (errors.length) console.warn(`[flow] ${id} (${laid.mode}):\n  ${errors.join("\n  ")}`);
 }

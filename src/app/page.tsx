@@ -1,9 +1,11 @@
-import FeaturedStage from "@/components/home/FeaturedStage";
-import Hero from "@/components/home/Hero";
-import Horizon from "@/components/home/Horizon";
-import Services from "@/components/home/Services";
-import ShortVersion from "@/components/home/ShortVersion";
-import { meta, profile } from "@/content/site";
+import Hero from "@/components/Hero";
+import Intro from "@/components/Intro";
+import Marquee from "@/components/Marquee";
+import Reel from "@/components/Reel";
+import StackPanel from "@/components/StackPanel";
+import Services from "@/components/Services";
+import Contact from "@/components/Contact";
+import { capabilities, featured, meta, profile, projects } from "@/content/site";
 
 /**
  * Google requires a ProfilePage to name its mainEntity. The person's full node
@@ -28,16 +30,6 @@ const PROFILE_SCHEMA = {
   },
 };
 
-/**
- * Home, in the order a wary client needs it: who and what (hero), the range
- * (horizon band), what he can build for them (services, each with proof),
- * the work drawn as architecture (featured stage), and the same person told
- * three ways (short version). The closing room comes from the layout.
- *
- * Every section is a server component. The only client code on this page is
- * two small islands, FeaturedTabs and Torch, and neither takes props: they
- * read the server HTML, so no project data is shipped to the browser.
- */
 export default function Page() {
   return (
     <>
@@ -46,10 +38,21 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(PROFILE_SCHEMA) }}
       />
       <Hero />
-      <Horizon />
+      <Intro />
       <Services />
-      <FeaturedStage />
-      <ShortVersion />
+      <Marquee items={capabilities} />
+      <Reel
+        items={featured.map((project) => ({
+          id: project.id,
+          name: project.name,
+          tier: project.tier,
+          lede: project.lede.recruiter,
+          stack: project.stack.slice(0, 5),
+        }))}
+        total={projects.length}
+      />
+      <StackPanel />
+      <Contact />
     </>
   );
 }

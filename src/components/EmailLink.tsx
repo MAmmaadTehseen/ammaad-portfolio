@@ -1,41 +1,30 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { motion } from "motion/react";
+import { useMagnetic } from "@/lib/motion";
 import { profile } from "@/content/site";
 
-type Variant = "voice" | "ghost" | "plain";
+/** The one target on the page worth reaching for, so the one that pulls back. */
+export default function EmailLink() {
+  const magnet = useMagnetic<HTMLAnchorElement>(0.22, 12);
 
-const LOOK: Record<Variant, string> = {
-  // The big address in the closing room and on /contact: Ysabeau 300 at the
-  // voice size. overflow-wrap:anywhere because a long address has no spaces
-  // and would otherwise push a 320px viewport sideways.
-  voice: "t-voice font-light text-ink u-link wrap-anywhere",
-  // The "Email" pill beside the primary CTA in the hero.
-  ghost: "btn btn-ghost",
-  // Inherits its surroundings (the footer's "Say hello").
-  plain: "u-link wrap-anywhere",
-};
-
-/**
- * A plain mailto link, rendered on the server. The old magnetic pull and its
- * permanent will-change are gone: the address is the target, and it holds
- * still. Copy-to-clipboard is a separate island (CopyEmail) set beside it.
- */
-export default function EmailLink({
-  variant = "voice",
-  children,
-  className,
-}: {
-  variant?: Variant;
-  /** Defaults to the address itself, or "Email" for the ghost pill. */
-  children?: ReactNode;
-  className?: string;
-}) {
-  const label = children ?? (variant === "ghost" ? "Email" : profile.email);
   return (
-    <a
+    <motion.a
+      ref={magnet.ref}
+      style={magnet.style}
+      onMouseMove={magnet.onMouseMove}
+      onMouseLeave={magnet.onMouseLeave}
+      onBlur={magnet.onBlur}
       href={`mailto:${profile.email}`}
-      className={className ? `${LOOK[variant]} ${className}` : LOOK[variant]}
+      data-cursor="Write to me"
+      className="group text-signal mt-10 inline-flex flex-wrap items-center gap-3 text-[clamp(1.1rem,3.4vw,2rem)] break-all will-change-transform"
     >
-      {label}
-    </a>
+      <span className="decoration-signal/40 underline-offset-8 group-hover:underline">
+        {profile.email}
+      </span>
+      <span className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden>
+        →
+      </span>
+    </motion.a>
   );
 }

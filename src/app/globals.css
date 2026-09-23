@@ -1,1457 +1,200 @@
 @import "tailwindcss";
-/* The docs describe what the site must never use ('no backdrop-filter'), and
-   Tailwind would otherwise read those words as class names and emit them. */
-@source not "../../*.md";
 
 /* ============================================================
-   AFTERGLOW
-   A dark, quiet room lit by the sunset in the portrait. Neutrals
-   lean towards the photo (hue 32, chroma 0.016 or less); one
-   apricot accent covers under 5% of any view. Drama comes from
-   light, never from painted surfaces.
-
-   Contrast (WCAG 2.x, on --bg): ink 16.92 · ink-2 13.00 ·
-   muted 8.17 · dim 6.16 · glow 12.25 · on-glow on glow 12.25.
-   Full table in DESIGN.md §2.
+   READ-OUT — design tokens
+   A precision-instrument panel: anodised olive housing, machined
+   type, one hot amber signal. Surface is tinted because the
+   surface IS the housing; the mood is environmental, not "warm".
+   Contrast verified: ink 17.0:1 · muted 7.7:1 · dim 5.4:1
+   · primary 9.9:1 · signal 8.5:1 (all against --bg)
    ============================================================ */
+@theme {
+  --color-bg: oklch(0.17 0.018 122);
+  --color-surface: oklch(0.225 0.022 122);
+  --color-surface-2: oklch(0.275 0.024 122);
+  --color-line: oklch(0.34 0.02 122);
+  --color-line-soft: oklch(0.28 0.02 122);
+  --color-ink: oklch(0.96 0.008 110);
+  --color-muted: oklch(0.72 0.018 112);
+  --color-dim: oklch(0.625 0.018 112);
+  --color-primary: oklch(0.78 0.15 124);
+  --color-signal: oklch(0.76 0.165 62);
 
-/* `static` so every token reaches :root even when no utility uses it: the
-   keyframes, SVG rules and inline styles below read them by name. The default
-   palette is cleared so an off-system colour cannot slip in by habit. */
-@theme static {
-  --color-*: initial;
-  --color-bg: oklch(0.165 0.009 32);
-  --color-bg-deep: oklch(0.135 0.008 32);
-  --color-surface: oklch(0.205 0.011 32);
-  --color-surface-2: oklch(0.245 0.013 32);
-  --color-line: oklch(0.33 0.014 32);
-  --color-line-strong: oklch(0.52 0.016 40);
-  --color-ink: oklch(0.955 0.011 80);
-  --color-ink-2: oklch(0.87 0.012 70);
-  --color-muted: oklch(0.735 0.02 50);
-  --color-dim: oklch(0.66 0.02 45);
-  --color-faint: oklch(0.56 0.018 40);
-  --color-glow: oklch(0.855 0.115 76);
-  --color-glow-hover: oklch(0.9 0.1 78);
-  --color-on-glow: oklch(0.165 0.009 32);
-  /* gradients only, 16% alpha or less: never text */
-  --color-ember: oklch(0.7 0.13 50);
-  --color-haze: oklch(0.62 0.05 30);
+  --font-display: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-martian), "Martian Mono", ui-monospace, monospace;
 
-  /* body, UI and diagram labels; the display face is its own utility below */
-  --font-sans: var(--font-text), ui-sans-serif, system-ui, sans-serif;
+  /* exponential ease-out only — no bounce, no elastic */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* decelerating tails only: no bounce, no overshoot */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
-
-  --radius-card: 14px;
-  --radius-sheet: 20px;
-
-  --container-frame: 1274px;
-  --container-body: 64ch;
-  --container-lead: 46ch;
-
-  /* the case page tick gutter only exists from here up */
-  --breakpoint-wide: 85rem;
+  --z-base: 1;
+  --z-sticky: 20;
+  --z-nav: 30;
+  --z-cursor: 60;
+  --z-boot: 80;
 }
 
-/* mixed from other tokens, so they live on :root and are exposed to
-   utilities by reference (fill-lit, bg-flare) */
-@theme inline {
-  --color-lit: var(--lit);
-  --color-flare: var(--flare);
-}
-
+/* semantic z-scale, referenced by name in components */
 :root {
-  /* short names for hand-written CSS, inline styles and SVG */
-  --bg: var(--color-bg);
-  --bg-deep: var(--color-bg-deep);
-  --surface: var(--color-surface);
-  --surface-2: var(--color-surface-2);
-  --line: var(--color-line);
-  --line-strong: var(--color-line-strong);
-  --ink: var(--color-ink);
-  --ink-2: var(--color-ink-2);
-  --muted: var(--color-muted);
-  --dim: var(--color-dim);
-  --faint: var(--color-faint);
-  --glow: var(--color-glow);
-  --glow-hover: var(--color-glow-hover);
-  --on-glow: var(--color-on-glow);
-  --ember: var(--color-ember);
-  --haze: var(--color-haze);
-
-  /* a node once it has switched on, and at the peak of switching on */
-  --lit: color-mix(in oklch, var(--glow) 8%, var(--surface-2));
-  --flare: color-mix(in oklch, var(--glow) 14%, var(--surface-2));
-
-  --dur-xs: 150ms;
-  --dur-s: 300ms;
-  --dur-m: 500ms;
-  --dur-l: 900ms;
-  --dur-xl: 1400ms;
-
-  /* the one z-scale. Poster and base share 0 on purpose: the poster is only
-     ever beneath the sheet, and DOM order settles the rest. */
-  --z-base: 0;
-  --z-poster: 0;
-  --z-sheet: 10;
-  --z-header: 50;
-  --z-menu: 80;
-  --z-skip: 100;
-
-  color-scheme: dark;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-nav: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-cursor: 60;
+  --z-boot: 80;
 }
 
-/* ============================================================
-   BASE
-   ============================================================ */
-
-/* in the base layer on purpose: unlayered, these would outrank every utility
-   and silently turn border-glow, text-muted and the rest into no-ops */
+/* in the base layer on purpose: unlayered, this outranks every utility and
+   silently turns border-signal, hover:border-line and the rest into no-ops */
 @layer base {
-  *,
-  ::before,
-  ::after {
-    border-color: var(--line);
-  }
-
-  html {
-    background: var(--bg);
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  body {
-    /* flex column so the footer sits at the bottom of short pages (404) */
-    display: flex;
-    flex-direction: column;
-    min-height: 100svh;
-    background: var(--bg);
-    color: var(--ink-2);
-    font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
-    font-size: 1.0625rem;
-    line-height: 1.68;
-    letter-spacing: 0.004em;
-    font-synthesis-weight: none;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    /* clip, not hidden: glows extend past their boxes, and hidden would make
-       body a scroll container and break every position: sticky below it */
-    overflow-x: clip;
-  }
-
-  #main {
-    flex: 1 0 auto;
-    min-width: 0;
-    /* body's clip is propagated to the viewport, where it becomes "hidden":
-       the page can still be scrolled sideways by script, focus or a phone's
-       pan. The About portrait's spill reaches ~60px past the edge, so clip
-       here too, on an element that is never propagated. */
-    overflow-x: clip;
-  }
-
-  /* main takes focus on route changes so screen readers start at the new
-     page. It is not a control, so it draws no ring; every control does. */
-  #main:focus {
-    outline: none;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-    font-weight: 300;
-    color: var(--ink);
-    text-wrap: balance;
-  }
-
-  p,
-  li,
-  dd {
-    text-wrap: pretty;
-  }
-
-  ::selection {
-    background: var(--glow);
-    color: var(--bg);
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--glow);
-    outline-offset: 3px;
-  }
-
-  /* anchor targets clear the fixed header, with or without Lenis */
-  [id] {
-    scroll-margin-top: 104px;
-  }
-
-  /* a grid or flex child with long content (an email, a URL, a diagram) must
-     be allowed to shrink, or it pushes the page sideways */
-  :where(.grid, .flex, .inline-flex, .inline-grid) > * {
-    min-width: 0;
+  * {
+    border-color: var(--color-line-soft);
   }
 }
 
-/* ============================================================
-   TYPE SCALE (DESIGN.md §3)
-   Utilities rather than classes so they take variants: md:t-h2.
-   Display tracking never tighter than -0.025em; Ysabeau 300
-   never below 1.5rem.
-   ============================================================ */
-
-@utility font-display {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+html {
+  background: var(--color-bg);
+  -webkit-tap-highlight-color: transparent;
 }
 
-@utility font-text {
-  font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-/* hero offer, h1 line 2 */
-@utility t-hero {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 300;
-  font-size: clamp(2.75rem, 1.1rem + 4.3vw, 5.25rem);
-  letter-spacing: -0.022em;
-  line-height: 1.02;
+::selection {
+  background: var(--color-signal);
+  color: var(--color-bg);
 }
 
-/* page h1: Work, About, Contact, case names of 18 characters or fewer */
-@utility t-page {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 300;
-  font-size: clamp(3rem, 1.4rem + 4.6vw, 5.75rem);
-  letter-spacing: -0.024em;
-  line-height: 1;
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
-/* case names over 18 characters */
-@utility t-page-long {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 300;
-  font-size: clamp(2.5rem, 1.2rem + 3.4vw, 4.25rem);
-  letter-spacing: -0.02em;
-  line-height: 1.02;
+/* ---------- type primitives ---------- */
+.u-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-stretch: 125%;
+  letter-spacing: -0.03em; /* floor is -0.04em */
+  line-height: 0.9;
+  text-wrap: balance;
 }
 
-/* closing room: "Let's build / something that lasts." */
-@utility t-close {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 300;
-  font-size: clamp(3rem, 1.4rem + 5vw, 6rem);
-  letter-spacing: -0.025em;
-  line-height: 1;
-}
-
-@utility t-h2 {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 300;
-  font-size: clamp(2.25rem, 1.2rem + 3vw, 4rem);
-  letter-spacing: -0.02em;
-  line-height: 1.02;
-}
-
-/* h3, service titles; list rows add font-[350] */
-@utility t-h3 {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 300;
-  font-size: clamp(1.625rem, 1.2rem + 1.5vw, 2.75rem);
-  letter-spacing: -0.015em;
-  line-height: 1.08;
-}
-
-/* /work index brand names */
-@utility t-name {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 350;
-  font-size: clamp(1.75rem, 1.2rem + 1.5vw, 2.75rem);
-  letter-spacing: -0.015em;
-  line-height: 1.08;
-}
-
-/* bio ledes, standfirsts, the big email, channel labels */
-@utility t-voice {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 350;
-  font-size: clamp(1.375rem, 1.05rem + 1.1vw, 2.125rem);
-  letter-spacing: -0.008em;
-  line-height: 1.22;
-}
-
-@utility t-lead {
-  font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
+.u-mono {
+  font-family: var(--font-mono);
   font-weight: 400;
-  font-size: clamp(1.125rem, 1rem + 0.35vw, 1.3125rem);
-  letter-spacing: 0;
-  line-height: 1.55;
-  max-width: 46ch;
-  color: var(--ink-2);
-}
-
-@utility t-body {
-  font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 1.0625rem;
-  letter-spacing: 0.004em;
-  line-height: 1.68;
-  max-width: 64ch;
-}
-
-@utility t-body-case {
-  font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 1.125rem;
-  letter-spacing: 0.004em;
-  line-height: 1.68;
-  max-width: 64ch;
-}
-
-/* nav, buttons and other UI text */
-@utility t-ui {
-  font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0;
-  line-height: 1.35;
-}
-
-/* meta and captions: times, years and counts line up */
-@utility t-meta {
-  font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 0.9375rem;
-  letter-spacing: 0;
-  line-height: 1.45;
+  letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
-  color: var(--muted);
 }
 
-/* the floor: nothing on the site is smaller than this */
-@utility t-legend {
-  font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 0.8125rem;
-  letter-spacing: 0;
-  line-height: 1.45;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
+/* the one deliberate label system: an engraved panel tag, always
+   paired with a tick rule. Not an eyebrow above every heading. */
+.u-engrave {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+  font-weight: 500;
 }
 
-@utility t-band {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 300;
-  font-size: clamp(1.25rem, 1rem + 0.7vw, 1.625rem);
-  letter-spacing: 0;
-  line-height: 1.3;
-  color: var(--muted);
+.u-prose {
+  max-width: 68ch;
+  text-wrap: pretty;
+  line-height: 1.6;
 }
 
-/* ============================================================
-   LAYOUT
-   ============================================================ */
-
-/* the page container: 1274px, 16px gutters on phones */
-@utility frame {
-  width: 100%;
-  max-width: 1274px;
-  margin-inline: auto;
-  padding-inline: 16px;
-
-  @media (width >= 48rem) {
-    padding-inline: clamp(16px, 4vw, 40px);
-  }
-}
-
-/* vertical rhythm between sections */
-@utility rhythm {
-  padding-block: clamp(96px, 14vh, 160px);
-}
-
-/* ============================================================
-   COMPONENTS
-   Layered so a utility on the same element still wins.
-   ============================================================ */
-
+/* ---------- panel materials ---------- */
+/* layered so a hover:border-* utility on a panel can actually take effect */
 @layer components {
-  /* ---------- skip link: first tab stop on every page ---------- */
-  .skip {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    z-index: var(--z-skip);
-    padding: 0.625rem 1.125rem;
-    border-radius: 999px;
-    background: var(--glow);
-    color: var(--on-glow);
-    font-weight: 600;
-    font-size: 0.9375rem;
-    line-height: 1.35;
-    translate: 0 calc(-100% - 24px);
-  }
-  .skip:focus-visible,
-  .skip:focus {
-    translate: 0 0;
-  }
-
-  /* ---------- buttons ---------- */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5em;
-    min-height: 44px;
-    padding: 0.625rem 1.25rem;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    font-family: var(--font-text), ui-sans-serif, system-ui, sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1.35;
-    white-space: nowrap;
-    transition:
-      background-color 0.3s var(--ease-out),
-      border-color 0.3s var(--ease-out),
-      color 0.3s var(--ease-out),
-      translate 0.3s var(--ease-out);
-  }
-  /* primary: filled apricot, dark label (12.25:1) */
-  .btn-glow {
-    background-color: var(--glow);
-    color: var(--on-glow);
-    font-weight: 600;
-  }
-  .btn-glow:hover {
-    background-color: var(--glow-hover);
-  }
-  /* ghost pill: the border is a UI boundary, so line-strong (3.48:1) */
-  .btn-ghost {
-    border-color: var(--line-strong);
-    color: var(--ink);
-  }
-  .btn-ghost:hover {
-    border-color: var(--muted);
-    background-color: var(--surface);
-  }
-
-  /* ---------- glint CTA (effect #25) ----------
-     A 1.5px border drawn by a conic gradient under a padding-box fill, so the
-     highlight can travel round the edge by turning one registered angle. */
-  .glint-cta {
-    --fill: var(--glow);
-    border: 1.5px solid transparent;
-    background:
-      linear-gradient(var(--fill), var(--fill)) padding-box,
-      conic-gradient(
-          from var(--a),
-          transparent 0 70%,
-          #ffd691 80%,
-          oklch(0.6 0.16 48) 88%,
-          transparent 96%
-        )
-        border-box;
-    color: var(--on-glow);
-    font-weight: 600;
-    transition:
-      --a 0s,
-      translate 0.3s var(--ease-out);
-  }
-  .glint-cta:hover {
-    --fill: var(--glow-hover);
-    background-color: transparent;
-    translate: 0 -1px;
-  }
-  .glint-cta:active {
-    scale: 0.98;
-  }
-
-  /* ---------- arrows: → nudges 3px, ↗ nudges up and right ---------- */
-  .arr,
-  .arr-out {
-    display: inline-block;
-    transition: translate 0.3s var(--ease-out);
-  }
-  :is(a, button):is(:hover, :focus-visible) .arr {
-    translate: 3px 0;
-  }
-  :is(a, button):is(:hover, :focus-visible) .arr-out {
-    translate: 2px -2px;
-  }
-
-  /* back to top */
-  .lift {
-    transition: translate 0.3s var(--ease-out);
-  }
-  .lift:is(:hover, :focus-visible) {
-    translate: 0 -3px;
-  }
-
-  /* ---------- the gradient underline (effect #26) ---------- */
-  .u-link {
-    text-decoration: none;
-    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
-    transition:
-      background-size 0.3s var(--ease-out),
-      color 0.3s var(--ease-out);
-  }
-  .u-link:is(:hover, :focus-visible),
-  .u-link[aria-current="page"] {
-    background-size: 100% 1px;
-  }
-
-  /* ---------- availability dot (effect #7) ----------
-     The dot is static; its halo breathes. Only dots marked data-ambient
-     breathe (the nav dot never does), and they pause off-screen. */
-  .avail-dot {
-    position: relative;
-    display: inline-block;
-    flex: none;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: var(--glow);
-  }
-  .avail-dot::after {
-    content: "";
-    position: absolute;
-    inset: -4px;
-    border-radius: inherit;
-    background: color-mix(in oklch, var(--glow) 32%, transparent);
-  }
-
-  /* ---------- light-up words (effect #1) ----------
-     Inline-block always, not only while animating, so a lit-seen reload lays
-     out exactly like a first visit. Real spaces sit between the spans. */
-  .lu .w {
-    display: inline-block;
-  }
-  .lu .acc {
-    color: var(--glow);
-  }
-
-  /* ---------- portrait and its spill (effects #2, #3) ----------
-     .portrait is the figure and carries the spill; .portrait-frame clips the
-     photo. The spill must sit outside the clip or the frame would cut it. */
-  .portrait {
-    position: relative;
-    isolation: isolate;
-  }
-  .portrait::before {
-    content: "";
-    position: absolute;
-    inset: -30% -40% -20% -40%;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      radial-gradient(
-        closest-side at 68% 28%,
-        color-mix(in oklch, #fecf76 26%, transparent),
-        transparent
-      ),
-      radial-gradient(
-        closest-side at 45% 55%,
-        color-mix(in oklch, var(--ember) 16%, transparent),
-        transparent
-      );
-  }
-  .portrait-frame {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 4 / 5;
-    border-radius: var(--radius-card);
-    /* the photo's dominant tone, so the frame never flashes charcoal */
-    background: oklch(0.42 0.05 55);
-  }
-
-  /* ---------- hero and the horizon (effect #5) ---------- */
-  .hero {
-    position: relative;
-    isolation: isolate;
-    overflow-x: clip;
-    view-timeline: --hero block;
-  }
-  /* light rising off the hairline under the hero: an ellipse centred on the
-     bottom edge, transparent at every other edge */
-  .hero::after,
-  .horizon-glow {
-    content: "";
-    position: absolute;
-    left: -10%;
-    right: -10%;
-    bottom: 0;
-    height: min(62svh, 560px);
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(
-      ellipse 50% 100% at 50% 100%,
-      color-mix(in oklch, var(--ember) 16%, transparent),
-      color-mix(in oklch, var(--haze) 9%, transparent) 45%,
-      transparent
-    );
-  }
-
-  /* ---------- horizon band (effect #6) ----------
-     Markup: .band[data-ambient] > ul.track[aria-label] + ul.track[aria-hidden].
-     At rest (no motion) the first list wraps as centred lines and the
-     duplicate is gone; under html.m both run side by side. */
-  .band {
-    display: flex;
-    overflow: hidden;
-    border-block: 1px solid var(--line);
-    padding-block: 1.25rem;
-  }
-  .band .track {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    row-gap: 0.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .band .track[aria-hidden="true"] {
-    display: none;
-  }
-  .band .track > li {
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-  }
-  .band .track > li::before {
-    content: "";
-    flex: none;
-    width: 4px;
-    height: 4px;
-    margin-inline: 1.5rem;
-    border-radius: 999px;
-    background: var(--glow);
-  }
-
-  /* ---------- nav (effects #9, #10) ----------
-     .site-header is the fixed row; .nav-pill condenses into the pill. */
-  .site-header {
-    position: fixed;
-    top: 16px;
-    left: 0;
-    right: 0;
-    z-index: var(--z-header);
-    padding-inline: 16px;
-    transition: translate 0.5s var(--ease-out);
-  }
-  .nav-pill {
-    position: relative;
-    margin-inline: auto;
-    max-width: 1274px;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    background-color: transparent;
-    transition:
-      max-width 0.55s var(--ease-out),
-      background-color 0.4s var(--ease-out),
-      border-color 0.4s var(--ease-out);
-  }
-  /* solid, never blurred: a blur repaints every frame under it */
-  .site-header[data-compact] .nav-pill {
-    max-width: 760px;
-    background-color: color-mix(in oklch, var(--surface) 94%, transparent);
-    border-color: var(--line);
-  }
-  .nav-clock {
-    display: none;
-    font-variant-numeric: tabular-nums;
-  }
-  @media (width >= 80rem) {
-    .site-header:not([data-compact]) .nav-clock {
-      display: inline;
-    }
-  }
-  .progress {
-    display: none;
-    position: absolute;
-    left: 18px;
-    right: 18px;
-    bottom: -1px;
-    height: 1px;
-    background: var(--glow);
-    transform-origin: 0 50%;
-    pointer-events: none;
-  }
-
-  /* ---------- mobile menu (effect #11) ---------- */
-  .menu::backdrop {
-    background: color-mix(in oklch, var(--bg) 96%, transparent);
-  }
-
-  /* ---------- focus-dimming lists (effect #13) ----------
-     .list > .row, with h3 / .name / p / .meta inside. A span.name is made
-     inline-block so it can slide. */
-  .list .row :is(h3, .name, p, .meta) {
-    transition:
-      color 0.3s var(--ease-out),
-      translate 0.4s var(--ease-out);
-  }
-  .list .row span.name {
-    display: inline-block;
-  }
-
-  /* ---------- radios that read as choices (short version, tier filter) ----
-     label.choice > input[type=radio] + text. The input stays native and
-     focusable; the label draws the state and the ring. */
-  .choice {
-    position: relative;
-    cursor: pointer;
-    color: var(--dim);
-    transition: color 0.3s var(--ease-out);
-  }
-  .choice:hover {
-    color: var(--ink-2);
-  }
-  .choice:has(:checked) {
-    color: var(--ink);
-  }
-  .choice:has(:focus-visible) {
-    outline: 2px solid var(--glow);
-    outline-offset: 3px;
-    border-radius: 6px;
-  }
-  .choice > input[type="radio"] {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  /* ---------- featured stage (effect #14) ---------- */
-  .tab {
-    color: var(--dim);
-    transition: color 0.3s var(--ease-out);
-  }
-  .tab:hover {
-    color: var(--ink-2);
-  }
-  .tab:is([aria-selected="true"], [data-active]) {
-    color: var(--ink);
-  }
-  .tab:is([aria-selected="true"], [data-active]) .meta {
-    color: var(--muted);
-  }
-  .tab-hair {
-    display: block;
-    width: 32px;
-    height: 1px;
-    background: var(--line-strong);
-    transform-origin: left;
-    scale: 0.5 1;
-    transition:
-      scale 0.3s var(--ease-out),
-      background-color 0.3s var(--ease-out);
-  }
-  .tab:is([aria-selected="true"], [data-active]) .tab-hair {
-    scale: 1 1;
-    background: var(--glow);
-  }
-
-  /* ---------- short version (effect #17) ---------- */
-  .short .choice::before {
-    content: "";
-    display: block;
-    width: 36px;
-    height: 1px;
-    margin-bottom: 0.5rem;
-    background: var(--line-strong);
-    transform-origin: left;
-    scale: 0.44 1;
-    transition:
-      scale 0.45s var(--ease-out),
-      background-color 0.45s var(--ease-out);
-  }
-  .short .choice:has(:checked)::before {
-    scale: 1 1;
-    background: var(--glow);
-  }
-
-  /* ---------- torch (effect #18) ----------
-     An aria-hidden duplicate of the active bio, lit only inside a soft circle
-     that follows the pointer. The base text underneath is muted. */
-  .torch {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    user-select: none;
-    color: color-mix(in oklch, var(--glow) 14%, var(--ink));
-    mask-image: radial-gradient(
-      circle 220px at var(--mx, -999px) var(--my, -999px),
-      #000 22%,
-      transparent 70%
-    );
-    opacity: 0;
-    transition: opacity 0.4s var(--ease-out);
-  }
-
-  /* ---------- /work preview card (effect #19) ----------
-     Server-rendered but inert until the lazy island shows it. */
-  .preview-card {
-    display: none;
-  }
-  .pv-stack {
-    display: grid;
-  }
-  .pv-stack > * {
-    grid-area: 1 / 1;
-  }
-  .pv {
-    opacity: 0;
-    content-visibility: auto;
-    transition: opacity 0.3s var(--ease-out);
-  }
-  .pv[data-on] {
-    opacity: 1;
-  }
-
-  /* mobile poster glyphs lean in a touch on hover */
-  .glyph svg {
-    transition: scale 0.35s var(--ease-out);
-  }
-  a:is(:hover, :focus-visible) .glyph svg {
-    scale: 1.03;
-  }
-
-  /* ---------- diagrams (effects #15, #16) ----------
-     .flow wraps the SVG(s); it receives data-play / data-sent. Inside:
-     .edge (solid, pathLength=1), .edge-dash (dashed), .edge-head (arrowhead),
-     .node-box (the fill shape), .pk (packet, pathLength=1). --e and --i are
-     set on edges and nodes. At rest a diagram is complete and lit. */
-  .flow .edge {
-    stroke-dasharray: 1;
-  }
-  .flow .node-box {
-    fill: var(--lit);
-  }
-  .flow .pk {
-    fill: none;
-    stroke-dasharray: 0.05 0.95;
-    opacity: 0;
-  }
-  /* full above 700px, the transposed layout at 700px and below, so labels
-     never render under 12px and nothing scrolls sideways */
-  @media (width <= 700px) {
-    .flow-full {
-      display: none;
-    }
-  }
-  @media (width > 700px) {
-    .flow-vertical {
-      display: none;
-    }
-  }
-  .case-fig {
-    view-timeline: --fig block;
-  }
-
-  /* ---------- case page (effects #21, #22) ----------
-     The poster is fixed at z 0 beneath the sheet (z 10). The header that
-     shares the first view is positioned so it paints over the poster. */
-  .case-poster {
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 100svh;
-    z-index: var(--z-poster);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    overflow: hidden;
-    pointer-events: none;
-    color: var(--muted);
-    /* never behind the h1: the left side fades out */
-    mask-image: linear-gradient(to left, #000 55%, transparent);
-  }
-  @media (width >= 64rem) {
-    .case-poster {
-      position: fixed;
-      inset: 0;
-      height: auto;
-      /* the header's text column (h1, lede, CTA) runs to ~54% of the width;
-         the poster is fully transparent over all of it and only resolves
-         in the empty right-hand side, so it never sits behind a word */
-      mask-image: linear-gradient(to right, transparent 0 58%, #000 82%);
-    }
-  }
-  .case-poster svg {
-    width: min(72vw, 980px);
-    height: auto;
-    opacity: 0.35;
-  }
-  @media (width >= 64rem) {
-    /* narrower, so the silhouette stays in the right-hand side the mask shows */
-    .case-poster svg {
-      width: min(62vw, 900px);
-    }
-  }
-  .case-poster[data-covered] {
-    visibility: hidden;
-  }
-  .case-header {
-    position: relative;
-    z-index: var(--z-base);
-  }
-  .case-sheet {
-    position: relative;
-    z-index: var(--z-sheet);
-    background: var(--surface);
-    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
-    box-shadow: 0 -24px 48px oklch(0.1 0.01 32 / 0.5);
-  }
-  @media (width >= 64rem) {
-    .case-sheet {
-      margin-top: -12svh;
-    }
-  }
-  .ticks a {
-    color: var(--muted);
-    transition: color 0.3s var(--ease-out);
-  }
-  .ticks a:is([aria-current="true"], [aria-current="location"], [aria-current="step"]) {
-    color: var(--ink);
-  }
-  .tick {
-    display: block;
-    width: 32px;
-    height: 1px;
-    background: var(--line-strong);
-    transform-origin: left;
-    scale: 0.5 1;
-    transition:
-      scale 0.3s var(--ease-out),
-      background-color 0.3s var(--ease-out);
-  }
-  .ticks a:is([aria-current="true"], [aria-current="location"], [aria-current="step"]) .tick {
-    scale: 1 1;
-    background: var(--glow);
-  }
-
-  /* ---------- closing room (effects #23, #24) ---------- */
-  .closing-room {
-    position: relative;
-    isolation: isolate;
-    overflow-x: clip;
-    min-height: 92svh;
-    background: linear-gradient(to bottom, var(--bg), var(--bg-deep));
-    view-timeline: --close block;
-  }
-  .closing-room :is(.l1, .l2) {
-    display: block;
-  }
-  .lamp {
-    position: absolute;
-    left: 50%;
-    top: 45%;
-    width: 56rem;
-    aspect-ratio: 1;
-    margin: -28rem 0 0 -28rem;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(
-      closest-side,
-      color-mix(in oklch, var(--glow) 11%, transparent),
-      transparent
-    );
-    translate: var(--lx, 0px) var(--ly, 0px);
-    transition: translate 0.9s var(--ease-out);
+  .u-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line-soft);
   }
 }
 
-/* ============================================================
-   KEYFRAMES (DESIGN.md §6)
-   Most define only `from`, so each element ends on its own
-   resting value: a glow word ends in glow, a lit node in --lit.
-   ============================================================ */
-
-@property --a {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 40deg;
+/* machined chamfer: a 1px inner highlight, the way anodised
+   aluminium catches light on a milled edge */
+.u-chamfer {
+  box-shadow: inset 0 1px 0 0 color-mix(in oklch, var(--color-ink) 8%, transparent);
 }
 
-@keyframes lit {
-  from {
-    color: var(--faint);
-    filter: blur(3px);
-    translate: 0 0.06em;
-  }
+.u-grain {
+  position: relative;
 }
-@keyframes open {
-  from {
-    clip-path: inset(6% round 14px);
-  }
-}
-@keyframes settle {
-  from {
-    scale: 1.06;
-  }
-}
-@keyframes spill {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes rise {
-  from {
-    opacity: 0.35;
-    translate: 0 14px;
-  }
-}
-/* --sd-o and --sd-y let the spill and the horizon share one keyframe */
-@keyframes sundown {
-  to {
-    opacity: var(--sd-o, 0.12);
-    translate: 0 var(--sd-y, 14%);
-  }
-}
-@keyframes drift {
-  to {
-    translate: 0 var(--drift, -6%);
-  }
-}
-@keyframes drift-x {
-  to {
-    translate: -100% 0;
-  }
-}
-@keyframes breathe {
-  to {
-    opacity: 0.55;
-    scale: 0.85;
-  }
-}
-/* transform, not the scale property: Tailwind's scale-x-* writes `scale` */
-@keyframes grow {
-  from {
-    transform: scaleX(0);
-  }
-}
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes sw-in {
-  from {
-    opacity: 0.35;
-    translate: 0 12px;
-  }
-}
-@keyframes draw {
-  from {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-  }
-}
-@keyframes window {
-  0% {
-    fill: var(--surface-2);
-  }
-  40% {
-    fill: var(--flare);
-  }
-  100% {
-    fill: var(--lit);
-  }
-}
-/* two identical packets: swapping the name restarts the pass on hover */
-@keyframes packet {
-  from {
-    opacity: 1;
-    stroke-dashoffset: 0.05;
-  }
-  to {
-    opacity: 1;
-    stroke-dashoffset: -0.95;
-  }
-}
-@keyframes packet-b {
-  from {
-    opacity: 1;
-    stroke-dashoffset: 0.05;
-  }
-  to {
-    opacity: 1;
-    stroke-dashoffset: -0.95;
-  }
-}
-@keyframes sink {
-  from {
-    opacity: 0.5;
-  }
-  to {
-    opacity: 0.18;
-    scale: 0.96;
-  }
-}
-@keyframes from-left {
-  from {
-    translate: -10vw 0;
-    color: var(--faint);
-  }
-}
-@keyframes from-right {
-  from {
-    translate: 10vw 0;
-    color: var(--faint);
-  }
-}
-@keyframes glint {
-  to {
-    --a: 400deg;
-  }
-}
-@keyframes focus-in {
-  from {
-    opacity: 0.4;
-    translate: 0 24px;
-    filter: blur(6px);
-  }
+.u-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ============================================================
-   MOTION STATES
-   Unlayered: these are states, and must beat a stray utility.
-   Rules:
-   - every dim or offset start state lives under html.m
-   - scrubbed variants live under html.m.sd
-   - swaps that must also work under reduced motion live under html.js
-   - nothing starts at opacity 0; the floor is .35 above the fold
-     and .4 below it
-   ============================================================ */
-
-/* ---------- once per session, on first paint ---------- */
-html.m:not(.lit-seen) .lu .w {
-  animation: lit 0.95s var(--ease-out) calc(160ms + var(--i, 0) * var(--lu-step, 70ms)) both;
-}
-html.m:not(.lit-seen) .rise {
-  animation: rise 0.7s var(--ease-out) calc(420ms + var(--i, 0) * 90ms) both;
-}
-html.m:not(.lit-seen) .portrait-hero .portrait-frame {
-  animation: open 1.5s var(--ease-expo) 0.1s both;
-}
-html.m:not(.lit-seen) .portrait-hero .portrait-frame img {
-  animation: settle 1.9s var(--ease-expo) 0.1s both;
-}
-html.m:not(.lit-seen) .portrait-hero::before {
-  animation: spill 2.4s var(--ease-out) 0.55s both;
+/* hairline measurement rule with an end tick, like a datasheet */
+.u-rule {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-line) 0%,
+    var(--color-line) 70%,
+    transparent 100%
+  );
 }
 
-/* ---------- sundown: the hero's light sinks as it leaves ---------- */
-html.m.sd .hero .portrait {
-  --drift: -6%;
-  animation: drift linear both;
-  animation-timeline: --hero;
-  animation-range: exit 0% exit 90%;
-}
-html.m.sd .hero .hero-copy {
-  --drift: -3%;
-  animation: drift linear both;
-  animation-timeline: --hero;
-  animation-range: exit 0% exit 90%;
-}
-html.m.sd .hero .portrait::before {
-  animation: sundown linear both;
-  animation-timeline: --hero;
-  animation-range: exit 0% exit 90%;
-}
-/* first visit: the spill wakes, then sinks with the scroll. The sundown's
-   implicit start composes over whatever the wake has reached. */
-html.m.sd:not(.lit-seen) .hero .portrait-hero::before {
-  animation:
-    spill 2.4s var(--ease-out) 0.55s both,
-    sundown linear both;
-  animation-timeline: auto, --hero;
-  animation-range: normal, exit 0% exit 90%;
-}
-html.m.sd .hero::after {
-  --sd-o: 0;
-  --sd-y: 0%;
-  animation: sundown linear both;
-  animation-timeline: --hero;
-  animation-range: exit 0% exit 90%;
+/* ---------- LED ---------- */
+.u-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-signal);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-signal) 18%, transparent),
+    0 0 12px 0 color-mix(in oklch, var(--color-signal) 60%, transparent);
 }
 
-/* ---------- horizon band ---------- */
-html.m .band {
-  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+@keyframes led-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }
-html.m .band .track {
-  flex: none;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  animation: drift-x 90s linear infinite;
-}
-html.m .band .track[aria-hidden="true"] {
-  display: flex;
-}
-.band:is(:hover, :focus-within, [data-off]) .track {
-  animation-play-state: paused;
-}
-/* static and wrapped, the first dot of the list leads nowhere */
-html:not(.m) .band .track > li:first-child::before {
-  display: none;
+.u-led-live {
+  animation: led-pulse 2.4s var(--ease-out-quart) infinite;
 }
 
-/* ---------- breathing dot ---------- */
-html.m .avail-dot[data-ambient]::after {
-  animation: breathe 2.8s ease-in-out infinite alternate;
-}
-.avail-dot[data-off]::after {
-  animation-play-state: paused;
+@keyframes marquee-track {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
 }
 
-/* ---------- nav: tuck on the way down, never under reduced motion ---------- */
-html.m .site-header[data-hidden]:not(:focus-within) {
-  translate: 0 -140%;
+/* ---------- scrollbar ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-2);
+  border: 2px solid var(--color-bg);
+  border-radius: 9999px;
 }
-html.m.sd .progress {
-  display: block;
-  animation: grow linear both;
-  animation-timeline: scroll(root);
-}
+::-webkit-scrollbar-thumb:hover { background: var(--color-line); }
 
-/* ---------- menu sheet ---------- */
-html.m .menu[open] {
-  animation: fade 0.3s var(--ease-out);
-}
-html.m .menu[open] .menu-item {
-  animation: rise 0.7s var(--ease-out) calc(var(--i, 0) * 50ms) both;
-}
-
-/* ---------- focus-pull reveals (effect #12) ----------
-   RevealRoot sets data-in once. Blur is for headings (focus) only. */
-/* the glint CTA borrows the observer for its arrival sweep, not a reveal */
-html.m [data-reveal]:not([data-reveal="glint"]) {
-  transition:
-    opacity 0.9s var(--ease-out),
-    translate 0.9s var(--ease-out),
-    filter 0.9s var(--ease-out);
-  transition-delay: calc(min(var(--i, 0), 8) * 70ms);
-}
-html.m [data-reveal="focus"]:not([data-in]) {
-  opacity: 0.4;
-  translate: 0 24px;
-  filter: blur(6px);
-}
-html.m [data-reveal="rise"]:not([data-in]) {
-  opacity: 0.4;
-  translate: 0 18px;
-}
-html.m [data-reveal="fade"]:not([data-in]) {
-  opacity: 0.5;
-  translate: 0 8px;
-}
-
-/* ---------- focus-dimming: colour, never opacity ---------- */
-@media (hover: hover) {
-  /* :has() cannot nest, so a focused link inside a row is its own clause */
-  .list:has(.row:hover, .row:focus-visible, .row :focus-visible)
-    .row:not(:hover, :focus-visible, :has(:focus-visible))
-    :is(h3, .name, p, .meta) {
-    color: var(--dim);
-  }
-  .list .row:is(:hover, :focus-visible, :has(:focus-visible)) .name {
-    color: var(--ink);
-  }
-  html.m .list .row:is(:hover, :focus-visible, :has(:focus-visible)) .name {
-    translate: 10px 0;
-  }
-}
-
-/* ---------- featured stage: one cell, attribute swaps ----------
-   Without JS the panels simply stack. */
-html.js .stage-panels {
-  display: grid;
-}
-html.js .stage-panels > .panel {
-  grid-area: 1 / 1;
-  min-width: 0;
-}
-html.js .panel:not([data-active]) {
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.3s var(--ease-out),
-    visibility 0s 0.3s;
-}
-html.js .panel[data-active] {
-  transition: opacity 0.5s var(--ease-out) 50ms;
-}
-html.m .panel[data-active] .panel-info {
-  animation: sw-in 0.5s var(--ease-out) both;
-}
-
-/* ---------- lit windows, time-based (effect #15) ----------
-   Only flows marked data-assemble wait dark for data-play; every other
-   diagram is simply complete. */
-html.m .flow[data-assemble]:not([data-play]) .edge {
-  stroke-dashoffset: 1;
-}
-html.m .flow[data-assemble]:not([data-play]) :is(.edge-dash, .edge-head) {
-  opacity: 0;
-}
-html.m .flow[data-assemble]:not([data-play]) .node-box {
-  fill: var(--surface-2);
-}
-html.m .flow[data-play] .edge {
-  animation: draw 0.8s var(--ease-out) calc(0.15s + var(--e, 0) * 60ms) both;
-}
-html.m .flow[data-play] .edge-dash {
-  animation: fade 0.6s var(--ease-out) calc(0.15s + var(--e, 0) * 60ms) both;
-}
-html.m .flow[data-play] .edge-head {
-  animation: fade 0.3s var(--ease-out) calc(0.75s + var(--e, 0) * 60ms) both;
-}
-html.m .flow[data-play] .node-box {
-  animation: window 1.1s var(--ease-out) calc(120ms + var(--i, 0) * 80ms) both;
-}
-/* one pass, never a loop; data-sent="b" replays it */
-html.m .flow[data-sent] .pk {
-  animation: packet 1.6s var(--ease-inout) calc(var(--e, 0) * 140ms) 1;
-}
-html.m .flow[data-sent="b"] .pk {
-  animation-name: packet-b;
-}
-
-/* ---------- lit windows, scroll-assembled (effect #16) ----------
-   Same specificity as the time-based rules and later, so it wins where
-   timelines exist. Labels never animate. */
-html.m.sd .case-fig .edge {
-  animation: draw linear both;
-  animation-timeline: --fig;
-  animation-range: entry calc(10% + var(--e, 0) * 4%) cover calc(38% + var(--e, 0) * 3%);
-}
-html.m.sd .case-fig :is(.edge-dash, .edge-head) {
-  animation: fade linear both;
-  animation-timeline: --fig;
-  animation-range: entry calc(10% + var(--e, 0) * 4%) cover calc(38% + var(--e, 0) * 3%);
-}
-html.m.sd .case-fig .node-box {
-  animation: window linear both;
-  animation-timeline: --fig;
-  animation-range: entry calc(10% + var(--i, 0) * 4%) cover calc(38% + var(--i, 0) * 3%);
-}
-
-/* ---------- short-version switch (effect #17): zero JS ----------
-   Without :has, or without JS, all three bios stack under their labels. */
-@supports selector(:has(*)) {
-  html.js .short .bios {
-    display: grid;
-  }
-  html.js .short .bio {
-    grid-area: 1 / 1;
-    min-width: 0;
-    opacity: 0;
-    visibility: hidden;
-    translate: 0 12px;
-    transition:
-      opacity 0.45s var(--ease-out),
-      translate 0.45s var(--ease-out),
-      visibility 0s 0.45s;
-  }
-  html.js .short:has(#r-client:checked) .bio-client,
-  html.js .short:has(#r-recruiter:checked) .bio-recruiter,
-  html.js .short:has(#r-engineer:checked) .bio-engineer {
-    opacity: 1;
-    visibility: visible;
-    translate: 0 0;
-    transition-delay: 120ms, 120ms, 0s;
-  }
-
-  /* ---------- tier filter (effect #20): zero JS, screen only ---------- */
-  @media screen {
-    html:not(.print-all) .tier-scope:has(#tier-live:checked) [data-tier]:not([data-tier="live"]),
-    html:not(.print-all) .tier-scope:has(#tier-closed:checked) [data-tier]:not([data-tier="closed"]),
-    html:not(.print-all) .tier-scope:has(#tier-open:checked) [data-tier]:not([data-tier="open"]) {
-      display: none;
-    }
-  }
-}
-
-/* ---------- torch ---------- */
+/* ---------- custom cursor: only where a real pointer exists ---------- */
 @media (hover: hover) and (pointer: fine) {
-  html.m .torch-host:hover .torch {
-    opacity: 1;
-    transition-duration: 0.3s;
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
   }
 }
 
-/* ---------- /work preview card ---------- */
-@media (hover: hover) and (pointer: fine) and (width >= 64rem) {
-  html.m .preview-card {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: var(--z-sheet);
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    scale: 0.96;
-    transition:
-      opacity 0.3s var(--ease-out),
-      scale 0.3s var(--ease-out),
-      visibility 0s 0.3s;
-  }
-  html.m .preview-card[data-show] {
-    opacity: 1;
-    visibility: visible;
-    scale: 1;
-    transition:
-      opacity 0.3s var(--ease-out),
-      scale 0.3s var(--ease-out),
-      visibility 0s;
-  }
-}
-
-/* ---------- case poster sinks under the sheet ---------- */
-html.m.sd .case-poster svg {
-  animation: sink linear both;
-  animation-timeline: scroll(root);
-  animation-range: 0 90svh;
-}
-
-/* ---------- converging close (effect #23) ---------- */
-html.m.sd .closing-room .l1 {
-  animation: from-left linear both;
-  animation-timeline: --close;
-  animation-range: entry 10% entry 100%;
-}
-html.m.sd .closing-room .l2 {
-  animation: from-right linear both;
-  animation-timeline: --close;
-  animation-range: entry 10% entry 100%;
-}
-
-/* ---------- glint, once (effect #25) ----------
-   On arrival: the CTA carries data-reveal="glint" (no start state), so the
-   shared observer marks it data-in once and it sweeps once. On hover or
-   focus: the angle transitions round, and snaps back silently on leave. */
-html.m .glint-cta[data-in] {
-  animation: glint 1.6s var(--ease-expo) 1;
-}
-html.m .glint-cta:is(:hover, :focus-visible) {
-  --a: 400deg;
-  transition:
-    --a 1.6s var(--ease-expo),
-    translate 0.3s var(--ease-out);
-}
-
-/* ============================================================
-   REDUCED MOTION
-   Every animation above is either gated on html.m (which the
-   gate never adds here) or collapsed to its end by this block.
-   ============================================================ */
+/* ---------- reduced motion: every animation gets an alternative ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1461,161 +204,51 @@ html.m .glint-cta:is(:hover, :focus-visible) {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  /* the stage still cross-fades, briefly, so a switch reads as a switch */
-  html.js .panel {
-    transition-duration: 0.15s !important;
-    transition-delay: 0s !important;
+  .u-led-live { animation: none; }
+  html.has-cursor,
+  html.has-cursor * { cursor: auto !important; }
+
+  /* JS-driven motion writes inline transforms, which CSS animation rules above
+     cannot reach. Components render one element tree for everyone (branching on
+     useReducedMotion would be a hydration mismatch), so the motion is pinned
+     here instead. !important beats the inline style. */
+  [data-reveal],
+  [data-motion],
+  [data-split] span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
+
+  /* travelling packets on the architecture diagrams are pure motion — there is
+     no static version worth showing, so they are simply absent */
+  [data-pulse] { display: none !important; }
 }
 
-/* ============================================================
-   NO SCRIPT, PRINT
-   Everything final, stacked and visible. Without scripts the gate
-   never runs, so this is a second net under the first; for print
-   (and html.print-all, for checking it on screen) the JS classes
-   are present and have to be undone.
-   ============================================================ */
+/* a packet travelling an edge of the architecture diagram. Paths carry
+   pathLength="1", so this one keyframe is correct for every edge length. */
+@keyframes flow-pulse {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* the portrait's idle re-scan: rests off the plate, then crosses once */
+@keyframes portrait-sweep {
+  0%, 62% { transform: translate3d(0, -100%, 0); opacity: 0; }
+  66% { opacity: 1; }
+  96% { opacity: 1; }
+  100% { transform: translate3d(0, 100%, 0); opacity: 0; }
+}
+
+/* repeat visitors and reduced-motion users never see the boot panel */
+html.boot-done #boot { display: none; }
+
+/* safety net: if scripts never run, nothing stays hidden waiting for them */
 @media (scripting: none) {
   [data-reveal] {
     opacity: 1 !important;
-    translate: none !important;
+    transform: none !important;
     filter: none !important;
   }
-  .panel,
-  .bio,
-  .rot {
-    grid-area: auto !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    translate: none !important;
-  }
-  [data-js-only],
-  .preview-card,
-  .torch {
-    display: none !important;
-  }
-}
-
-html.print-all *,
-html.print-all *::before,
-html.print-all *::after {
-  animation: none !important;
-  transition: none !important;
-}
-html.print-all [data-reveal] {
-  opacity: 1 !important;
-  translate: none !important;
-  filter: none !important;
-}
-html.print-all :is(.stage-panels, .bios) {
-  display: flex !important;
-  flex-direction: column;
-  gap: 2.5rem;
-}
-html.print-all :is(.panel, .bio, .rot) {
-  grid-area: auto !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  translate: none !important;
-}
-html.print-all .flow .edge {
-  stroke-dashoffset: 0 !important;
-}
-html.print-all .flow :is(.edge-dash, .edge-head) {
-  opacity: 1 !important;
-}
-html.print-all .flow .node-box {
-  fill: var(--lit) !important;
-}
-html.print-all :is([data-js-only], .preview-card, .torch, .band .track[aria-hidden="true"]) {
-  display: none !important;
-}
-
-@media print {
-  /* paper is white: the room's light-on-dark would print as nothing */
-  :root {
-    --color-bg: #fff;
-    --color-bg-deep: #fff;
-    --color-surface: #fff;
-    --color-surface-2: #f4f1ee;
-    --color-line: #d9d3cc;
-    --color-line-strong: #9d8f88;
-    --color-ink: #120d0c;
-    --color-ink-2: #261e1d;
-    --color-muted: #574c48;
-    --color-dim: #574c48;
-    --color-faint: #574c48;
-    --color-glow: #8a5a12;
-  }
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-  [data-reveal] {
-    opacity: 1 !important;
-    translate: none !important;
-    filter: none !important;
-  }
-  .stage-panels,
-  .bios {
-    display: flex !important;
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-  .panel,
-  .bio,
-  .rot {
-    grid-area: auto !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    translate: none !important;
-  }
-  .flow .edge {
-    stroke-dashoffset: 0 !important;
-  }
-  .flow :is(.edge-dash, .edge-head) {
-    opacity: 1 !important;
-  }
-  .flow .node-box {
-    fill: var(--lit) !important;
-  }
-  .site-header,
-  .skip,
-  .lamp,
-  .case-poster,
-  .torch,
-  .preview-card,
-  [data-js-only],
-  .band .track[aria-hidden="true"] {
-    display: none !important;
-  }
-  .hero::after,
-  .portrait::before,
-  .horizon-glow {
-    display: none;
-  }
-  .case-sheet {
-    margin-top: 0;
-    box-shadow: none;
-  }
-}
-
-/* ============================================================
-   LENIS
-   Its documented base styles; harmless when it never loads.
-   ============================================================ */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis:not(.lenis-autoToggle).lenis-stopped {
-  overflow: clip;
-}
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-.lenis.lenis-smooth iframe {
-  pointer-events: none;
+  #boot { display: none !important; }
 }

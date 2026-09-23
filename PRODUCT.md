@@ -1,123 +1,67 @@
 # PRODUCT.md
 
 ## Register
-Brand site. It is a personal portfolio that also works as the sales page for a freelance practice.
 
-## Who it is for, in priority order
-1. **Freelance clients (primary).** These are founders, operations leads and product owners at small and mid-sized companies, mostly in the UK, EU, Gulf and US. They need one of four things:
-   - **SaaS & web apps** built
-   - **AI features & agents** added to a real product
-   - **Automation & integrations** between the tools they already pay for
-   - **Rescue & maintenance** of an app someone else left fragile
+**Brand.** Design is the product. A visitor's impression *is* the deliverable.
 
-   They read at the end of the day, tired and wary. In two minutes they need to know four things: who he is, what he builds for them, whether it is real, and how to start. Every page ends with a way to start.
-2. **Recruiters and hiring managers (secondary).** They need role, stack, scope and dates. They can find these on About, in "My part" on every case study, and in the "Recruiter" reading of the short version.
-3. **Engineers (tertiary).** They need to know how things are actually built. They get this from "How it fits together", "Under the hood" and the "Engineer" reading.
+## What this is
 
-The site leads with the client. The other audiences get their depth by scrolling or by choosing a reading. The site never retunes itself for them.
+The personal portfolio of Muhammad Ammaad Tehseen — a full-stack engineer in
+Lahore whose work is mostly systems work: billing lifecycles, retrieval
+pipelines, real-time presence, queues, migrations against live data.
 
-## The central idea: honest disclosure
-Most of Ammaad's best work is private client software. He cannot show screenshots, so the site shows how each system fits together instead: 19 architecture diagrams drawn from real data, each with a plain-text version. The tier is always stated in words:
-- **Live**: shipped and running
-- **Open source**: code is public
-- **Private source**: described by architecture only
+## Who reads it
 
-Private work always ends with "happy to walk you through it", followed by a way to book.
+Three audiences who want incompatible things from the same nine projects:
+
+1. **Clients** — can this person make my business work? They want outcomes, not
+   architecture.
+2. **Recruiters** — does the stack match the role? They want scope, role, tools.
+3. **Engineers** — is this person any good? They want the decisions and the
+   landmines, and they can smell padding.
+
+Writing one page for all three produces a page that lands with none of them. So
+the page has a **channel switch** and retunes: same work, three depths of
+disclosure. This is the central product idea, not a feature.
+
+## The disclosure problem
+
+Most of the strongest work is client software with private source. The usual
+answers are both bad: omit it (undersells badly) or show a screenshot that gives
+away someone else's product. The answer here is a third thing — an **animated
+architecture diagram** of the real request path. It proves the engineering
+without exposing the client.
 
 ## Emotional target
-**Soft, warm, trustworthy. Lamplit, unhurried, exact.** The site should feel like a calm person with steady hands. It should not feel like a machine, a game or a template.
-- The page is a dark, quiet room lit only by the sunset in his own photograph.
-- Things come into focus. They do not fly in.
-- One moment of choreography plays once. Everything else answers the reader's scroll or pointer.
-- Nothing asks the reader to wait, click to start, chase a cursor or decode text.
-- The "wow" comes from craft and restraint. Nothing is there just for effect.
 
-Previous target, now retired: "precision instrument". That meant the boot screen, reticle cursor, WebGL trace, scanned-plate portrait and channel tuner, and the owner found it gamified.
-
-## What a client must get in 10 seconds (first viewport, 390px and up)
-- His face, in colour
-- The offer sentence: "I build the software your business actually runs on."
-- His name, role and location, as visible text in the h1
-- Four real, shipped product names ("Recently shipped: …")
-- A filled "Book a 30-minute call" button, plus WhatsApp and email
-- Whether he is available, and what time it is in Lahore compared with the reader's own time
-
-## Conversion principles
-- **One primary action everywhere:** book the 30-minute call (Calendly). WhatsApp and email are always offered right next to it, and no form is ever required.
-- **Services come before work.** Each service links to three projects that prove it.
-- **Every case study asks at the moment of peak interest:** "Book a call about something similar."
-- **The same closing block ends every page except /contact** (/contact is itself the ask). It carries a reassurance line taken from `contact.honest`.
-- **The time-zone objection is answered in plain text:** "18:42 in Lahore, 14:42 where you are."
-- **Availability is shown only when `profile.available` is true.** No stale dates.
-- Upwork and Fiverr are deliberately not linked yet (phase two).
+Precision and reliability. The feeling of a well-made instrument: nothing
+decorative, everything calibrated, and a quiet confidence that it will still work
+at 3am. Not "creative studio". Not "hacker".
 
 ## Anti-references
-- Boot or loading screens, counters, "click to start"
-- Custom cursors that hide the pointer
-- HUD or instrument chrome, scramble or decode text
-- Game-world metaphors, sound prompts
-- WebGL wallpaper
-- Scroll-jacking or pinned horizontal runways
-- Hero metric rows, proficiency bars, invented numbers, fake liveness
-- Identical icon-card grids, uppercase eyebrows, 01/02/03 section scaffolding
-- Glassmorphism, gradient text, side-stripe borders
-- Lime-on-black v0/shadcn templates, navy-and-mint Brittany clones, synthwave sunsets, decorative glow blobs
-- The editorial serif-italic-plus-mono lane
-- Terminal green
+
+- **Terminal-green hacker portfolio.** The first-order reflex for a dev site.
+  Monospace has a job here (instrument labels) but never as costume.
+- **Editorial-typographic.** Display-serif italic, ruled columns, mono kickers.
+  The saturated 2026 brand default; not this brand.
+- **SaaS-cream landing page.** Warm near-white, hero-metric row, identical card
+  grid, an uppercase eyebrow above every section.
+- **Fabricated proficiency numbers.** No "React 92%" bars. The stack is grouped by
+  how often it is actually in hand.
+- **Invented metrics.** No user counts or revenue figures that cannot be stood
+  behind in a conversation.
+
+## Accessibility commitments
+
+- Every text colour verified against its actual background; body text ≥4.5:1.
+- Reduced motion is a designed path, not a disabled one.
+- The channel switch is a real radiogroup with arrow-key navigation.
+- Nothing is gated on JavaScript.
+- The custom cursor only appears for fine pointers, and never replaces focus
+  states.
 
 ## Voice
-- British spelling. Short, concrete sentences. No superlatives. No invented metrics.
-- Say "Private source", not "Closed".
-- Describe the stack as "Stack and integrations", never as a framework list.
-- New microcopy needs Ammaad's approval before launch:
-  - "Recently shipped:"
-  - "The short version"
-  - "Read this as a"
-  - "Each one points at the work that proves it."
-  - "Not sure which of these it is?"
-  - "drawn rather than screenshotted: how a request actually moves through it."
-  - "What it does for the business"
-  - "My part"
-  - "How it fits together"
-  - "Read it as text"
-  - "Under the hood"
-  - "See it"
-  - "Book a call about something similar"
-  - "Nothing lives at this address."
 
-## Content rules
-- `src/content/site.ts` is the single source of truth. Edit only that file for content, and change the domain only in `profile.site`.
-- Counts always come from the arrays (`projects`, `showcase`, `shortEntries`, `alsoBuilt`, `featured`), never from literals. Today there are 23 projects: 19 showcase, 4 short, 2 alsoBuilt, 8 featured.
-- Some projects were built on a no-code platform. Never name that platform anywhere: copy, alt text, JSON-LD, comments or commits.
-- Link labels are printed as given. A hostname is never printed.
-- Client names appear exactly as cleared in site.ts.
-- Never import `projects` into a client component. Islands receive DOM attributes or trimmed props only.
-
-## Commitments
-**Accessibility**
-- WCAG 2.2 AA. Body text is 4.5:1 or better at its real size. Non-text UI is 3:1 or better.
-- A visible 2px focus ring.
-- A skip link to `#main` on every page.
-- The header is revealed whenever keyboard focus is inside it.
-- Real radiogroup and tab semantics.
-- Diagrams have a text alternative that lists their connections.
-
-**Nothing is gated on JavaScript**
-- All content is visible in the server HTML.
-- Motion start states exist only after a pre-paint class, with a 3-second failsafe, and never begin from opacity 0.
-- `scripting: none` and print both show everything.
-
-**Reduced motion is a designed path**
-- No light-ups, scrubs, loops or smooth scrolling.
-- Diagrams render complete. The capability band becomes a static wrapped list.
-
-**Performance ("less memory taking")**
-- No WebGL.
-- Two looping animations on the whole site, both paused off-screen.
-- Zero requestAnimationFrame work when idle.
-- The motion library loads on /work only, after the first hover.
-- About 79 KB of fonts. Numeric budgets are in the acceptance checks.
-
-**Findability**
-- Keep the JSON-LD graph with stable @ids, ProfilePage on the home page only, CreativeWork and BreadcrumbList on project pages, per-page canonical, OG and Twitter metadata, the sitemap and robots.
-- Keep the 308 redirects and the noindex header on the preview host.
+Plain, specific, load-bearing. Short sentences. Concrete nouns — webhook,
+migration, roster, queue. No superlatives about himself; the work carries it.
+British spelling in prose.

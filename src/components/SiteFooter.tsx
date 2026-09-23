@@ -1,110 +1,99 @@
 import Link from "next/link";
 import { profile } from "@/content/site";
-import ClosingRoom from "./ClosingRoom";
-import EmailLink from "./EmailLink";
-import { ClosingGate } from "./islands/NavState";
+import BookCallLink from "./BookCallLink";
+import WhatsAppLink from "./WhatsAppLink";
 
-const PAGES = [
+const SECTIONS = [
   { label: "Work", href: "/work" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
 
-/** Small, sentence case, Afacad 500: labels for the lists, not display type. */
-const HEADING =
-  "font-text text-ink text-[0.9375rem] leading-[1.35] font-medium";
-
 /**
- * The end of every page: the closing room, then the bottom row.
- *
- * The room is skipped on /contact (the page is itself the ask), and the 404
- * hides it too, so both end on the bottom row alone. The room sits outside
- * <footer> on purpose: it is the page's last section, with its own heading,
- * not site-wide small print.
- *
- * The lists use the shared focus-dimming (.list / .row / .name), so pointing
- * at one link quietly steps its neighbours down to --dim.
+ * Sits in the root layout, so every page ends with a way out — the project
+ * pages previously dead-ended with no footer at all. Deliberately compact: the
+ * home page keeps its own full contact section, and repeating that at the foot
+ * of every page would flatten it.
  */
 export default function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <>
-      <ClosingGate>
-        <ClosingRoom />
-      </ClosingGate>
-
-      <footer className="bg-bg-deep border-line border-t">
-        <div className="frame pt-14 pb-10">
-          <div className="grid gap-10 sm:grid-cols-3 lg:grid-cols-[repeat(3,minmax(0,16rem))] lg:gap-16">
-            <nav aria-labelledby="footer-pages">
-              <h2 id="footer-pages" className={HEADING}>
-                Pages
-              </h2>
-              <ul className="list t-ui mt-4 space-y-1">
-                {PAGES.map((page) => (
-                  <li key={page.href} className="row">
-                    <Link
-                      href={page.href}
-                      className="name text-ink-2 inline-block py-1.5"
-                    >
-                      <span className="u-link">{page.label}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
-            <div>
-              <h2 id="footer-elsewhere" className={HEADING}>
-                Elsewhere
-              </h2>
-              <ul
-                aria-labelledby="footer-elsewhere"
-                className="list t-ui mt-4 space-y-1"
-              >
-                {profile.socials.map((social) => (
-                  <li key={social.href} className="row">
-                    <a
-                      href={social.href}
-                      target="_blank"
-                      rel="me noopener noreferrer"
-                      className="name text-ink-2 inline-flex items-center gap-1.5 py-1.5"
-                    >
-                      <span className="u-link">{social.label}</span>
-                      <span className="arr-out text-muted" aria-hidden="true">
-                        ↗
-                      </span>
-                      <span className="sr-only"> (opens in a new tab)</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h2 className={HEADING}>Say hello</h2>
-              <p className="t-ui mt-4 py-1.5">
-                <EmailLink variant="plain" className="text-ink-2" />
-              </p>
-            </div>
+    <footer className="border-line-soft mt-auto border-t px-5 py-10 sm:px-8">
+      <div className="mx-auto flex max-w-[1400px] flex-wrap items-start justify-between gap-8">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <span className={`u-led ${profile.available ? "u-led-live" : ""}`} aria-hidden />
+            <span className="u-mono text-muted text-[11px] tracking-[0.14em] uppercase">
+              {profile.available ? profile.availableNote : "Not taking work right now"}
+            </span>
           </div>
-
-          <div className="border-line t-meta mt-14 flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-t pt-6">
-            <p>
-              © {year} {profile.name}
-            </p>
-            <p>Built with Next.js — no template</p>
-            <a
-              href="#main"
-              className="lift inline-flex items-center gap-1.5 py-1.5"
-            >
-              <span className="u-link">Back to top</span>
-              <span aria-hidden="true">↑</span>
-            </a>
+          <a
+            href={`mailto:${profile.email}`}
+            data-cursor="Write to me"
+            className="text-signal mt-3 inline-block text-lg break-all hover:underline"
+          >
+            {profile.email}
+          </a>
+          <div className="mt-2 flex flex-col items-start gap-1.5">
+            <BookCallLink className="text-muted hover:text-signal" />
+            <WhatsAppLink className="text-muted hover:text-signal" />
           </div>
         </div>
-      </footer>
-    </>
+
+        <nav aria-label="Footer" className="flex gap-10">
+          <div>
+            <span className="u-engrave">Pages</span>
+            <ul className="mt-3 space-y-1.5">
+              {SECTIONS.map((section) => (
+                <li key={section.href}>
+                  <Link
+                    href={section.href}
+                    data-cursor={section.label}
+                    className="text-muted hover:text-ink text-sm transition-colors"
+                  >
+                    {section.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <span className="u-engrave">Elsewhere</span>
+            <ul className="mt-3 space-y-1.5">
+              {profile.socials.map((social) => (
+                <li key={social.href}>
+                  <a
+                    href={social.href}
+                    target="_blank"
+                    rel="noreferrer noopener me"
+                    data-cursor={social.label}
+                    className="text-muted hover:text-ink group inline-flex items-center gap-2 text-sm transition-colors"
+                  >
+                    {social.label}
+                    <span
+                      className="text-dim transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      aria-hidden
+                    >
+                      ↗
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+      </div>
+
+      <div className="border-line-soft mx-auto mt-10 flex max-w-[1400px] flex-wrap items-center justify-between gap-3 border-t pt-6">
+        <span className="u-mono text-dim text-[10px] tracking-[0.12em] uppercase">
+          © {year} {profile.name} — {profile.location}
+        </span>
+        <span className="u-mono text-dim/70 text-[10px] tracking-[0.12em] uppercase">
+          Built with Next.js — no template
+        </span>
+      </div>
+    </footer>
   );
 }
